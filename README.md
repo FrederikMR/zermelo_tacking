@@ -1,2 +1,1 @@
-# tszn
-Time-Stochastic Zermelo Navigation for Vikings, Albatrosses and Microswimmers
+# Time-Stochastic Zermelo Navigation for Vikings, Albatrosses and Microswimmers
