@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat May 25 14:29:35 2024
+Created on Sat Aug 10 19:35:13 2024
 
 @author: fmry
 """
 
-#%% Import modules
+#%% Modules
 
-from .gradient_descent import GradientDescent
-from .jax_optimization import JAXOptimization
 from .georce import GEORCE
-from .scipy_optimization import ScipyOptimization

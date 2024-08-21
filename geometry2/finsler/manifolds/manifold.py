@@ -14,115 +14,10 @@ from geometry.setup import *
 
 #%% Riemannian Manifold
 
-class RiemannianManifold(ABC):
+class FinslerManifold(ABC):
     def __init__(self,
-                 G:Callable[[Array], Array]=None,
-                 f:Callable[[Array], Array]=None,
-                 invf:Callable[[Array],Array]=None,
-                 )->None:
-        
-        self.f = f
-        self.invf = invf
-        if ((G is None) and (f is None)):
-            raise ValueError("Both the metric, g, and chart, f, is not defined")
-        elif (G is None):
-            self.G = lambda z: self.pull_back_metric(z)
-        else:
-            self.G = G
-            
-        return
-        
-    def __str__(self)->str:
-        
-        return "Riemannian Manifold base object"
-    
-    def Jf(self,
-           z:Array
-           )->Array:
-        
-        if self.f is None:
-            raise ValueError("Both the pull-back map is not defined")
-        else:
-            return jacfwd(self.f)(z)
-        
-    def pull_back_metric(self,
-                         z:Array
-                         )->Array:
-        
-        if self.f is None:
-            raise ValueError("Both the pull-back map is not defined")
-        else:
-            Jf = self.Jf(z)
-            return jnp.einsum('ik,il->kl', Jf, Jf)
-    
-    def DG(self,
-           z:Array
-           )->Array:
-
-        return jacfwd(self.G)(z)
-    
-    def Ginv(self,
-             z:Array
-             )->Array:
-        
-        return jnp.linalg.inv(self.G(z))
-    
-    def christoffel_symbols(self,
-                            z:Array
-                            )->Array:
-        
-        Dgx = self.DG(z)
-        gsharpx = self.Ginv(z)
-        
-        return 0.5*(jnp.einsum('im,kml->ikl',gsharpx,Dgx)
-                   +jnp.einsum('im,lmk->ikl',gsharpx,Dgx)
-                   -jnp.einsum('im,klm->ikl',gsharpx,Dgx))
-    
-    def geodesic_equation(self,
-                          z:Array,
-                          v:Array
-                          )->Array:
-        
-        Gamma = self.Chris(z)
-
-        dx1t = v
-        dx2t = -jnp.einsum('ikl,k,l->i',Gamma,v,v)
-        
-        return jnp.hstack((dx1t,dx2t))
-    
-    def energy(self, 
-               gamma:Array,
-               )->Array:
-        
-        T = len(gamma)-1
-        dt = 1.0/T
-        dgamma = (gamma[1:]-gamma[:-1])*T
-        
-        g = vmap(lambda g: self.G(g))(gamma)
-        integrand = jnp.einsum('ti,tij,tj->t', dgamma, g[:-1], dgamma)
-        
-        return jnp.trapz(integrand, dx=dt)
-    
-    def length(self,
-               gamma:Array,
-               )->Array:
-        
-        T = len(gamma)-1
-        dt = 1.0/T
-        
-        dgamma = (gamma[1:]-gamma[:-1])*T
-        
-        g = vmap(lambda g: self.G(g))(gamma)
-        integrand = jnp.sqrt(jnp.einsum('ti,tij,tj->t', dgamma, g[:-1], dgamma))
-            
-        return jnp.trapz(integrand, dx=dt)
-
-#%% LorentFinslerManifold
-
-class LorentzFinslerManifold(ABC):
-    def __init__(self,
-                 F:Callable[[Array, Array, Array], Array],
-                 G:Callable[[Array, Array, Array], Array]=None,
+                 F:Callable[[Array, Array], Array],
+                 G:Callable[[Array, Array], Array]=None,
                  f:Callable[[Array], Array]=None,
                  invf:Callable[[Array],Array]=None,
                  )->None:
@@ -138,34 +33,33 @@ class LorentzFinslerManifold(ABC):
         
     def __str__(self)->str:
         
-        return "FLorentz insler Manifold base object"
+        return "Finsler Manifold base object"
     
-    def G(self, t:Array, z:Array, v:Array)->Array:
+    def G(self, z:Array, v:Array)->Array:
         
-        return 0.5*jacfwd(lambda v1: grad(lambda v2: self.F(t,z,v2)**2)(v1))(v)
+        return 0.5*jacfwd(lambda v1: grad(lambda v2: self.F(z,v2)**2)(v1))(v)
     
-    def g(self, t:Array, z:Array, v:Array)->Array:
+    def g(self, z:Array, v:Array)->Array:
         
-        G = self.G(t,z,v)
+        G = self.G(z,v)
         
         return jnp.einsum('i,ij,j->', v, G, v)
     
-    def Ginv(self, t:Array,z:Array, v:Array)->Array:
+    def Ginv(self, z:Array, v:Array)->Array:
         
-        return jnp.linalg.inv(self.G(t,z,v))
+        return jnp.linalg.inv(self.G(z,v))
     
-    def Dg(self, t:Array, z:Array, v:Array)->Array:
+    def Dg(self, z:Array, v:Array)->Array:
         
-        return jacfwd(self.G, argnums=1)(t,z,v)
+        return jacfwd(self.G, argnums=0)(z,v)
     
     def geodesic_equation(self, 
-                          t:Array,
                           z:Array, 
                           v:Array
                           )->Array:
         
-        g = self.G(t,z,v)
-        Dg = self.Dg(t,z,v)
+        g = self.G(z,v)
+        Dg = self.Dg(z,v)
         
         rhs = jnp.einsum('ikj,i,j->k', Dg, v, v)-0.5*jnp.einsum('ijk,i,j->k', Dg, v, v)
         rhs = jnp.linalg.solve(g, rhs)
@@ -176,7 +70,6 @@ class LorentzFinslerManifold(ABC):
         return jnp.vstack((dx1t,dx2t))        
     
     def energy(self, 
-               t:Array,
                gamma:Array,
                )->Array:
         
@@ -184,12 +77,11 @@ class LorentzFinslerManifold(ABC):
         dt = 1.0/T
         dgamma = (gamma[1:]-gamma[:-1])*T
 
-        integrand = vmap(lambda t,g,dg: self.F(t,g,dg)**2)(t[:-1],gamma[:-1], dgamma)
+        integrand = vmap(lambda g,dg: self.F(g,dg)**2)(gamma[:-1], dgamma)
 
         return jnp.trapz(integrand, dx=dt)
     
     def length(self,
-               t:Array,
                gamma:Array,
                )->Array:
         
@@ -197,12 +89,11 @@ class LorentzFinslerManifold(ABC):
         dt = 1.0/T
         dgamma = (gamma[1:]-gamma[:-1])*T
 
-        integrand = vmap(lambda t,g,dg: self.F(t,g,dg))(t[:-1],gamma[:-1],dgamma)
+        integrand = vmap(lambda g,dg: self.F(g,dg))(gamma[:-1],dgamma)
             
         return jnp.trapz(integrand, dx=dt)
     
     def indicatrix(self,
-                   t:Array,
                    z:Array,
                    grid:Array=None,
                    eps:float=1e-4,
@@ -244,7 +135,7 @@ class LorentzFinslerManifold(ABC):
             else:
                 u = jnp.hstack((u0,ui))
 
-            return (self.F(t,z,u)-1.0)**2
+            return (self.F(z,u)-1.0)**2
         
         if grid is None:
             grid = jnp.linspace(-5.0,5.0,10)
@@ -285,7 +176,7 @@ class LorentzFinslerManifold(ABC):
         #u = jnp.concatenate((u1,u1_reverse), axis=0)
         u = jnp.concatenate((u1, u2), axis=0)
         #u = jnp.concatenate((u1,u2,u1_reverse,u2_reverse), axis=0)
-        length = vmap(self.F, in_axes=(None, None, 0))(t,z, u)
+        length = vmap(self.F, in_axes=(None, 0))(z, u)
         u = u[(length-1.0)**2 < eps]
         #u = jnp.sort(u, axis=0)
         
