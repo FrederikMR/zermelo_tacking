@@ -152,7 +152,7 @@ class LorentzFinslerManifold(ABC):
     
     def Ginv(self, t:Array,z:Array, v:Array)->Array:
         
-        return jnp.linalg.inv(self.G(t,z,v))
+        return jnp.linalg.pinv(self.G(t,z,v))
     
     def Dg(self, t:Array, z:Array, v:Array)->Array:
         
@@ -197,16 +197,66 @@ class LorentzFinslerManifold(ABC):
         dt = 1.0/T
         dgamma = (gamma[1:]-gamma[:-1])*T
 
-        integrand = vmap(lambda t,g,dg: self.F(t,g,dg))(t[:-1],gamma[:-1],dgamma)
+        integrand = vmap(lambda t,g,dg,s: self.F(t,g,dg))(t[:-1],gamma[:-1],dgamma)
             
         return jnp.trapz(integrand, dx=dt)
+    
+    def time_fun(self,
+                 t0:Array,
+                 zt:Array,
+                 )->Array:
+        
+        t = self.time_integral(t0,
+                               zt[:-1],
+                               zt[-1],
+                               )[:-1]
+        
+        return t
+    
+    def time_integral(self,
+                      t0:Array,
+                      zt:Array,
+                      zT:Array,
+                      )->Array:
+        
+        def time_update(t:Array,
+                        step:Tuple[Array,Array],
+                        )->Array:
+            
+            z, dz = step
+            
+            t += self.F(t, z, dz)
+            
+            return (t,)*2
+
+        dz = jnp.vstack((zt[1:]-zt[:-1], zT-zt[-1]))
+        _, t = lax.scan(time_update,
+                        init=t0,
+                        xs = (zt, dz),
+                        )
+        
+        return t
     
     def indicatrix(self,
                    t:Array,
                    z:Array,
-                   grid:Array=None,
-                   eps:float=1e-4,
+                   N_points:int=100,
+                   *args,
                    )->Array:
+        
+        theta = jnp.linspace(0.,2*jnp.pi,N_points)
+        u = jnp.vstack((jnp.cos(theta), jnp.sin(theta))).T
+        
+        norm = vmap(self.F, in_axes=(None, None, 0))(t,z,u)
+        
+        return jnp.einsum('ij,i->ij', u, 1./norm)
+    
+    def indicatrix_opt(self,
+                       t:Array,
+                       z:Array,
+                       grid:Array=None,
+                       eps:float=1e-4,
+                       )->Array:
         
         def minimizer(u0:Array,
                       reverse:bool=False
@@ -214,7 +264,7 @@ class LorentzFinslerManifold(ABC):
             
             if reverse:
                 u = jminimize(obj_fun, 
-                              x0=jnp.ones(1, dtype=jnp.float32), 
+                              x0=jnp.ones(1, dtype=z.dtype), 
                               args=(True, u0), 
                               method="BFGS", tol=1e-4, 
                               options={'maxiter':100}).x
@@ -223,7 +273,7 @@ class LorentzFinslerManifold(ABC):
                                )
             else:
                 u = jminimize(obj_fun, 
-                              x0=jnp.ones(1, dtype=jnp.float32), 
+                              x0=jnp.ones(1, dtype=z.dtype), 
                               args=(u0, False), 
                               method="BFGS", tol=1e-4, 
                               options={'maxiter':100}).x
@@ -250,25 +300,25 @@ class LorentzFinslerManifold(ABC):
             grid = jnp.linspace(-5.0,5.0,10)
 
         u11 = vmap(lambda u0: jnp.hstack((u0, jminimize(obj_fun, 
-                                                       x0=jnp.ones(1, dtype=jnp.float32), 
+                                                       x0=jnp.ones(1, dtype=z.dtype), 
                                                        args=(u0, False), 
                                                        method="BFGS", tol=eps, 
                                                        options={'maxiter':100}).x)))(grid)
         u12 = vmap(lambda u0: jnp.hstack((u0, jminimize(obj_fun, 
-                                                       x0=-jnp.ones(1, dtype=jnp.float32), 
+                                                       x0=-jnp.ones(1, dtype=z.dtype), 
                                                        args=(u0, False), 
                                                        method="BFGS", tol=eps, 
                                                        options={'maxiter':100}).x)))(grid)
         u1 = jnp.concatenate((u11, u12), axis=0)
         
         u21 = vmap(lambda u0: jnp.hstack((jminimize(obj_fun, 
-                                                   x0=-jnp.ones(1, dtype=jnp.float32),
+                                                   x0=-jnp.ones(1, dtype=z.dtype),
                                                    args=(u0, True),
                                                    method="BFGS", tol=eps,
                                                    options={'maxiter':100}).x,
                                          u0)))(grid)
         u22 = vmap(lambda u0: jnp.hstack((jminimize(obj_fun, 
-                                                   x0=-jnp.ones(1, dtype=jnp.float32),
+                                                   x0=-jnp.ones(1, dtype=z.dtype),
                                                    args=(u0, True),
                                                    method="BFGS", tol=eps,
                                                    options={'maxiter':100}).x,

@@ -9,10 +9,13 @@ Created on Mon Jun 24 10:46:44 2024
 #%% Modules
 
 from jax import Array
-from jax import vmap, grad, jacfwd, jacrev
+from jax import vmap, grad, jacfwd, jacrev, value_and_grad
 from jax import lax
 
 import jax.numpy as jnp
+
+import jax 
+jax.config.update("jax_enable_x64", True)
 
 #jac scipy
 import jax.scipy as jscipy
