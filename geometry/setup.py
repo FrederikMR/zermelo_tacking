@@ -10,6 +10,7 @@ Created on Mon Jun 24 10:46:44 2024
 
 from jax import Array
 from jax import vmap, grad, jacfwd, jacrev, value_and_grad
+import jax.random as jrandom
 from jax import lax
 
 import jax.numpy as jnp

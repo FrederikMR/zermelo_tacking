@@ -37,7 +37,7 @@ from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationB
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="poincarre",
+    parser.add_argument('--manifold', default="time_only",
                         type=str)
     parser.add_argument('--geometry', default="fixed",
                         type=str)
@@ -47,7 +47,7 @@ def parse_args():
                         type=int)
     parser.add_argument('--lr_rate', default=0.01,
                         type=float)
-    parser.add_argument('--tol', default=1e-4,
+    parser.add_argument('--tol', default=1e-2,
                         type=float)
     parser.add_argument('--max_iter', default=1000,
                         type=int)
@@ -187,11 +187,20 @@ def estimate_stochastic_tacking()->None:
     if os.path.exists(save_path):
         os.remove(save_path)
     
-    t0, z0, zT, tack_metrics_sim, reverse_tack_metrics_sim = load_stochastic_manifold(args.manifold)
+    t0, z0, zT, Malpha_expected, Mbeta_expected, tack_metrics_sim, reverse_tack_metrics_sim = load_stochastic_manifold(args.manifold)
     
     N_sim = len(tack_metrics_sim)
     
     methods = {}
+    
+    Geodesic = GEORCE_H(Malpha_expected, init_fun=None, T=args.T, tol=args.tol, max_iter=1000, line_search_params={'rho': 0.5})
+    ReverseGeodesic = GEORCE_H(Mbeta_expected, init_fun=None, T=args.T, tol=args.tol, max_iter=1000, line_search_params={'rho': 0.5})
+    
+    
+    print("Estimation of Expected Geodesics...")
+    methods['ExpectedGeodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT)
+    methods['ExpectedReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
+    
     for i in range(N_sim):
         print(f"Computing curves for simulation {i+1}/{N_sim}...")
         

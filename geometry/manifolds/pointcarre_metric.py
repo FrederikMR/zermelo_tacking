@@ -59,3 +59,61 @@ class PointcarreRight(LorentzFinslerManifold):
         d2 = d**2
         
         return (-jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)+(x-y)*d)/(2*d2*v-v)
+    
+#%% Elliptic Finsler
+
+class ExpectedPointcarreLeft(LorentzFinslerManifold):
+    def __init__(self,
+                 subkey,
+                 N_sim:int=1000,
+                 )->None:
+        
+        eps = 0.5+jrandom.normal(subkey, shape=(N_sim,)).squeeze()
+        self.eps = jnp.clip(eps, 0.1, 0.9)
+
+        super().__init__(F=self.F_metric)
+        
+        return
+        
+    def F_metric(self, t, z, dz):
+        
+        return jnp.mean(vmap(self.F_sample, in_axes=(None,None,None,0))(t,z,dz,self.eps), axis=0)
+    
+    def F_sample(self, t, z, dz, eps):
+        
+        u, v = z[0], z[1]
+        x,y = dz[0], dz[1]
+        
+        d = eps
+        d2 = d**2
+        
+        return (-jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)+(x+y)*d)/(2*d2*v-v)
+    
+#%% Elliptic Finsler
+
+class ExpectedPointcarreRight(LorentzFinslerManifold):
+    def __init__(self,
+                 subkey,
+                 N_sim:int=1000,
+                 )->None:
+        
+        eps = 0.5+jrandom.normal(subkey, shape=(N_sim,)).squeeze()
+        self.eps = jnp.clip(eps, 0.1, 0.9)
+
+        super().__init__(F=self.F_metric)
+        
+        return
+        
+    def F_metric(self, t, z, dz):
+        
+        return jnp.mean(vmap(self.F_sample, in_axes=(None,None,None,0))(t,z,dz,self.eps), axis=0)
+        
+    def F_sample(self, t, z, dz, eps):
+        
+        u, v = z[0], z[1]
+        x,y = dz[0], dz[1]
+        
+        d = eps
+        d2 = d**2
+        
+        return (-jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)+(x-y)*d)/(2*d2*v-v)

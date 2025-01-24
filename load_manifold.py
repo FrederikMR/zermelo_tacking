@@ -60,8 +60,8 @@ def load_manifold(manifold:str="direction_only",
         c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t))
         Mbeta = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
         
-        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha]
-        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta]
+        tack_metrics = [Malpha,Mbeta]
+        reverse_tack_metrics = [Mbeta, Malpha]
         
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([0.,0.], dtype=jnp.float32)

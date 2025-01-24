@@ -52,8 +52,8 @@ def generate_job(manifold, geometry):
         --method adam \\
         --T 1000 \\
         --lr_rate 0.01 \\
-        --tol 0.0001 \\
-        --max_iter 10000 \\
+        --tol 0.01 \\
+        --max_iter 1000 \\
         --sub_iter 5 \\
         --N_sim 5 \\
         --seed 2712 \\

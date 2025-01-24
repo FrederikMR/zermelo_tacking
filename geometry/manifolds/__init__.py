@@ -14,6 +14,6 @@ from .nSphere import nSphere
 from .T2 import T2
 from .nEuclidean import nEuclidean
 
-from .pointcarre_metric import PointcarreLeft, PointcarreRight
-from .elliptic_finsler import EllipticFinsler
+from .pointcarre_metric import PointcarreLeft, PointcarreRight, ExpectedPointcarreLeft, ExpectedPointcarreRight
+from .elliptic_finsler import EllipticFinsler, ExpectedEllipticFinsler
 from .time_only import TimeOnly
