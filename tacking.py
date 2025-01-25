@@ -37,9 +37,9 @@ from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationB
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="time_only",
+    parser.add_argument('--manifold', default="direction_only",
                         type=str)
-    parser.add_argument('--geometry', default="fixed",
+    parser.add_argument('--geometry', default="stochastic",
                         type=str)
     parser.add_argument('--method', default="adam",
                         type=str)
@@ -200,6 +200,26 @@ def estimate_stochastic_tacking()->None:
     print("Estimation of Expected Geodesics...")
     methods['ExpectedGeodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT)
     methods['ExpectedReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
+    
+    if args.method == "adam":
+        Tacking = SequentialOptimizationADAM([Malpha_expected, Mbeta_expected], lr_rate=args.lr_rate, init_fun=None, max_iter=args.max_iter, 
+                                         tol=args.tol, T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
+        ReverseTacking = SequentialOptimizationADAM([Mbeta_expected, Malpha_expected], lr_rate = args.lr_rate, init_fun = None, max_iter=args.max_iter, tol=args.tol,
+                                                    T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
+    elif args.method == "bfgs":
+        Tacking = SequentialOptimizationBFGS([Malpha_expected, Mbeta_expected], init_fun=None, max_iter=args.max_iter, 
+                                     tol=args.tol, T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
+        ReverseTacking = SequentialOptimizationBFGS([Mbeta_expected, Malpha_expected], init_fun = None, max_iter=args.max_iter, tol=args.tol,
+                                                    T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
+    else:
+        raise ValueError("Invalid method for sequential optimization!")
+        
+    print("Estimation of expected tack points...")
+    methods['ExpectedTacking'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=1)), 
+                                             t0, z0, zT)
+    methods['ExpectedReverseTacking'] = estimate_curve(jit(lambda t0, z0, zT: ReverseTacking(t0, z0, zT, n_tacks=1)), 
+                                                    t0, z0, zT)
+    save_times(methods, save_path)
     
     for i in range(N_sim):
         print(f"Computing curves for simulation {i+1}/{N_sim}...")
