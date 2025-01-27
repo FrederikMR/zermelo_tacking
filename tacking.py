@@ -131,7 +131,7 @@ def estimate_tacking()->None:
         os.makedirs(save_path)
         
     save_path = ''.join((save_path, args.method, 
-                         f'_{args.manifold}', 
+                         f'_{args.manifold}.pkl', 
                          ))
     if os.path.exists(save_path):
         os.remove(save_path)
@@ -182,7 +182,7 @@ def estimate_stochastic_tacking()->None:
         os.makedirs(save_path)
         
     save_path = ''.join((save_path, args.method, 
-                         f'_{args.manifold}', 
+                         f'_{args.manifold}.pkl', 
                          ))
     if os.path.exists(save_path):
         os.remove(save_path)
