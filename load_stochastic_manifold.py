@@ -29,7 +29,7 @@ def load_stochastic_manifold(manifold:str="direction_only",
     
     if manifold == "direction_only":
         
-        eps = jnp.pi*jrandom.normal(subkey, shape=(N_sim,2))
+        eps = jrandom.normal(subkey, shape=(N_sim,2,2))
         
         Malpha = []
         Mbeta = []
@@ -38,18 +38,18 @@ def load_stochastic_manifold(manifold:str="direction_only",
         for e in eps:
             rho=3/2
             phi=jnp.pi/2+6*jnp.pi/10
-            theta = lambda t,x,v: jnp.pi+e[0]
-            a=lambda t,x,v: 2
+            theta = lambda t,x,v: jnp.pi+e[0][0]
+            a=lambda t,x,v: 2+e[0][1]
             b=lambda t,x,v: 2
             c1 = lambda t,x,v: -rho*jnp.cos(phi)
             c2 = lambda t,x,v: -rho*jnp.sin(phi)
             M1 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
             
-            a=lambda t,x,v: 1
+            a=lambda t,x,v: 1+e[1][0]
             b=lambda t,x,v: 1
             c1=lambda t,x,v: 3/4
             c2=lambda t,x,v: 0
-            theta=lambda t,x,v: 0+e[1]
+            theta=lambda t,x,v: 0+e[1][0]
             M2 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
             
             Malpha.append(M1)
@@ -84,7 +84,7 @@ def load_stochastic_manifold(manifold:str="direction_only",
     
     elif manifold == "time_only":
         
-        eps = jnp.pi*jrandom.normal(subkey, shape=(N_sim,))
+        eps = jrandom.normal(subkey, shape=(N_sim,2))
         
         Malpha = []
         Mbeta = []
@@ -95,8 +95,8 @@ def load_stochastic_manifold(manifold:str="direction_only",
             
             rho=lambda t: -3/2
             phi=lambda t: 0
-            theta = lambda t,x,v: jnp.pi/4+e
-            a=lambda t,x,v: 7
+            theta = lambda t,x,v: jnp.pi/4+e[0]
+            a=lambda t,x,v: 7+e[1]
             b=lambda t,x,v: a(t,x,v)/4
             c1 = lambda t,x,v: rho(t)*jnp.cos(phi(t))
             c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t))
