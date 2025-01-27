@@ -131,9 +131,7 @@ def load_stochastic_manifold(manifold:str="direction_only",
     
     elif manifold == "poincarre":
         
-        eps = 0.5+jnp.pi*jrandom.normal(subkey, shape=(N_sim,2))
-        
-        eps = jnp.clip(eps, 0.1, 0.9)
+        eps = jrandom.uniform(subkey, shape=(N_sim,2), minval=0.4, maxval=0.6)
         
         Malpha = []
         Mbeta = []
