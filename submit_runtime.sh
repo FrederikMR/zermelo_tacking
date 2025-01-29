@@ -22,7 +22,7 @@
         --method adam \
         --T 1000 \
         --lr_rate 0.01 \
-        --tol 0.001 \
+        --tol 0.0001 \
         --max_iter 1000 \
         --sub_iter 5 \
         --N_sim 5 \
