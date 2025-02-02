@@ -26,7 +26,8 @@ import argparse
 
 from typing import Dict
 
-from load_manifold import load_manifold, load_stochastic_manifold, load_albatross_data
+from load_manifold import load_manifold
+from load_stochastic_manifold import load_stochastic_manifold
 
 from geometry.geodesic import GEORCE_H
 from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationBFGS
@@ -36,9 +37,9 @@ from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationB
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="direction_only",
+    parser.add_argument('--manifold', default="poincarre",
                         type=str)
-    parser.add_argument('--geometry', default="albatross",
+    parser.add_argument('--geometry', default="stochastic",
                         type=str)
     parser.add_argument('--method', default="adam",
                         type=str)
@@ -54,12 +55,8 @@ def parse_args():
                         type=int)
     parser.add_argument('--N_sim', default=5,
                         type=int)
-    parser.add_argument('--data_idx', default=0,
-                        type=int)
     parser.add_argument('--seed', default=2712,
                         type=int)
-    parser.add_argument('--albatross_file_path', default='../../../../Data/albatross/tracking_data.xls',
-                        type=str)
     parser.add_argument('--save_path', default='tacking/',
                         type=str)
 
@@ -190,9 +187,7 @@ def estimate_stochastic_tacking()->None:
     if os.path.exists(save_path):
         os.remove(save_path)
     
-    t0, z0, zT, Malpha_expected, Mbeta_expected, tack_metrics_sim, reverse_tack_metrics_sim = load_stochastic_manifold(args.manifold,
-                                                                                                                       N_sim=args.N_sim,
-                                                                                                                       seed=args.seed)
+    t0, z0, zT, Malpha_expected, Mbeta_expected, tack_metrics_sim, reverse_tack_metrics_sim = load_stochastic_manifold(args.manifold)
     
     N_sim = len(tack_metrics_sim)
     
@@ -261,96 +256,6 @@ def estimate_stochastic_tacking()->None:
             
     return
 
-#%% Riemannian Run Time code
-
-def estimate_albatross_tacking()->None:
-    
-    args = parse_args()
-    
-    save_path = ''.join((args.save_path, f'stochastic/{args.manifold}/'))
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-        
-    save_path = ''.join((save_path, args.method, 
-                         f'_{args.manifold}.pkl', 
-                         ))
-    if os.path.exists(save_path):
-        os.remove(save_path)
-    
-    t0, z0, zT, Malpha, Mbeta, tack_metrics_sim, reverse_tack_metrics_sim = load_albatross_data(args.manifold,
-                                                                                                file_path=args.albatross_file_path,
-                                                                                                N_sim=args.N_sim,
-                                                                                                seed=args.seed)
-    z0 = z0[args.data_idx]
-    zT = zT[args.data_idx]
-    
-    N_sim = len(tack_metrics_sim)
-    
-    methods = {}
-    Geodesic = GEORCE_H(Malpha, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
-    ReverseGeodesic = GEORCE_H(Mbeta, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
-    
-    
-    print("Estimation of Geodesics...")
-    methods['Geodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT)
-    methods['ReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
-    
-    if args.method == "adam":
-        Tacking = SequentialOptimizationADAM([Malpha, Mbeta], lr_rate=args.lr_rate, init_fun=None, max_iter=args.max_iter, 
-                                         tol=args.tol, T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
-        ReverseTacking = SequentialOptimizationADAM([Mbeta, Malpha], lr_rate = args.lr_rate, init_fun = None, max_iter=args.max_iter, tol=args.tol,
-                                                    T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
-    elif args.method == "bfgs":
-        Tacking = SequentialOptimizationBFGS([Malpha, Mbeta], init_fun=None, max_iter=args.max_iter, 
-                                     tol=args.tol, T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
-        ReverseTacking = SequentialOptimizationBFGS([Mbeta, Malpha], init_fun = None, max_iter=args.max_iter, tol=args.tol,
-                                                    T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
-    else:
-        raise ValueError("Invalid method for sequential optimization!")
-        
-    print("Estimation of tack points...")
-    methods['ExpectedTacking'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=1)), 
-                                             t0, z0, zT)
-    methods['ExpectedReverseTacking'] = estimate_curve(jit(lambda t0, z0, zT: ReverseTacking(t0, z0, zT, n_tacks=1)), 
-                                                    t0, z0, zT)
-    save_times(methods, save_path)
-    
-    for i in range(N_sim):
-        print(f"Computing curves for simulation {i+1}/{N_sim}...")
-        
-        tack_metrics = tack_metrics_sim[i]
-        reverse_tack_metrics = reverse_tack_metrics_sim[i]
-
-        Geodesic = GEORCE_H(tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
-        ReverseGeodesic = GEORCE_H(reverse_tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
-        
-        if args.method == "adam":
-            Tacking = SequentialOptimizationADAM(tack_metrics, lr_rate=args.lr_rate, init_fun=None, max_iter=args.max_iter, 
-                                             tol=args.tol, T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
-            ReverseTacking = SequentialOptimizationADAM(reverse_tack_metrics, lr_rate = args.lr_rate, init_fun = None, max_iter=args.max_iter, tol=args.tol,
-                                                        T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
-        elif args.method == "bfgs":
-            Tacking = SequentialOptimizationBFGS(tack_metrics, init_fun=None, max_iter=args.max_iter, 
-                                         tol=args.tol, T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
-            ReverseTacking = SequentialOptimizationBFGS(reverse_tack_metrics, init_fun = None, max_iter=args.max_iter, tol=args.tol,
-                                                        T=args.T, sub_iter=args.sub_iter, line_search_params={'rho': 0.5})
-        else:
-            raise ValueError("Invalid method for sequential optimization!")
-        
-        print("\tEstimation of Geodesics...")
-        methods[f'Geodesic{i}'] = estimate_curve(jit(Geodesic), t0, z0, zT)
-        methods[f'ReverseGeodesic{i}'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
-        
-        for j in range(1, len(tack_metrics)):
-            print(f"\tEstimation {j} tack points...")
-            methods[f'Tacking{i}_{j}'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=j)), 
-                                                     t0, z0, zT)
-            methods[f'ReverseTacking{i}_{j}'] = estimate_curve(jit(lambda t0, z0, zT: ReverseTacking(t0, z0, zT, n_tacks=j)), 
-                                                            t0, z0, zT)
-            save_times(methods, save_path)
-            
-    return
-
 #%% main
 
 if __name__ == '__main__':
@@ -361,7 +266,5 @@ if __name__ == '__main__':
         estimate_tacking()
     elif args.geometry == "stochastic":
         estimate_stochastic_tacking()
-    elif args.geometry == "albatross":
-        estimate_albatross_tacking()
     else:
         raise ValueError("Invalid geometry for runtime comparison.")
