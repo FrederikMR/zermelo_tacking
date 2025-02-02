@@ -265,7 +265,7 @@ class GEORCE_H(ABC):
         zs = self.init_fun(z0,zT,self.T)
         us = jnp.ones((self.T, self.dim), dtype=dtype)*self.diff/self.T
         ts = self.update_ts(zs, us)
-        
+
         rs = self.rs(ts[:-1], zs, us[1:])
         hs = self.hs(jnp.hstack((self.t0, ts[:-1])), jnp.vstack((self.z0.reshape(1,-1), zs)), us)
         gs = self.gs(ts[:-1], zs, us[1:])

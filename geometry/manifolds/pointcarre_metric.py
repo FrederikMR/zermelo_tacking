@@ -65,11 +65,10 @@ class PointcarreRight(LorentzFinslerManifold):
 class ExpectedPointcarreLeft(LorentzFinslerManifold):
     def __init__(self,
                  subkey,
-                 N_sim:int=1000,
+                 eps:Array,
                  )->None:
         
-        eps = 0.5+jrandom.normal(subkey, shape=(N_sim,)).squeeze()
-        self.eps = jnp.clip(eps, 0.1, 0.9)
+        self.eps = eps
 
         super().__init__(F=self.F_metric)
         
@@ -94,11 +93,10 @@ class ExpectedPointcarreLeft(LorentzFinslerManifold):
 class ExpectedPointcarreRight(LorentzFinslerManifold):
     def __init__(self,
                  subkey,
-                 N_sim:int=1000,
+                 eps:Array,
                  )->None:
         
-        eps = 0.5+jrandom.normal(subkey, shape=(N_sim,)).squeeze()
-        self.eps = jnp.clip(eps, 0.1, 0.9)
+        self.eps = eps
 
         super().__init__(F=self.F_metric)
         

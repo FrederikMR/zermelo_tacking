@@ -70,7 +70,7 @@ class EllipticFinsler(LorentzFinslerManifold):
 class ExpectedEllipticFinsler(LorentzFinslerManifold):
     def __init__(self,
                  subkey,
-                 N_sim:int=1000,
+                 eps:Array,
                  c1:Callable=lambda t,x,v: 1.0, 
                  c2:Callable=lambda t,x,v: 1.0,
                  a:Callable=lambda t,x,v: 1.0,
@@ -83,7 +83,7 @@ class ExpectedEllipticFinsler(LorentzFinslerManifold):
         self.a = a
         self.b = b
         self.theta = theta
-        self.eps = jnp.pi*jrandom.normal(subkey, shape=(N_sim,)).squeeze()
+        self.eps = eps
         
         self.dim = 2
         self.emb_dim = None
@@ -98,11 +98,11 @@ class ExpectedEllipticFinsler(LorentzFinslerManifold):
     
     def F_sample(self, t, x, v, eps):
 
-        c1 = self.c1(t,x,v)
-        c2 = self.c2(t,x,v)
-        a = self.a(t,x,v)
-        b = self.b(t,x,v)
-        theta = self.theta(t,x,v)+eps
+        c1 = self.c1(t,x,v,eps)
+        c2 = self.c2(t,x,v,eps)
+        a = self.a(t,x,v,eps)
+        b = self.b(t,x,v,eps)
+        theta = self.theta(t,x,v,eps)
         
         x,y = v[0], v[1]
         
@@ -121,4 +121,4 @@ class ExpectedEllipticFinsler(LorentzFinslerManifold):
               2*a2*b2*c1*c2*(x*jnp.cos(theta)-y*jnp.sin(theta))*(x*jnp.sin(theta)+y*jnp.cos(theta))-\
               a2*b2*c22*(x*jnp.cos(theta)-y*jnp.sin(theta))**2)**(1/2))/(a2*b2-a2*c22-b2*c12)
         
-        return f
+        return f.squeeze()

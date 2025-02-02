@@ -37,7 +37,7 @@ from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationB
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="direction_only",
+    parser.add_argument('--manifold', default="poincarre",
                         type=str)
     parser.add_argument('--geometry', default="stochastic",
                         type=str)
@@ -49,7 +49,7 @@ def parse_args():
                         type=float)
     parser.add_argument('--tol', default=1e-2,
                         type=float)
-    parser.add_argument('--max_iter', default=1000,
+    parser.add_argument('--max_iter', default=1,
                         type=int)
     parser.add_argument('--sub_iter', default=5,
                         type=int)
@@ -138,8 +138,8 @@ def estimate_tacking()->None:
     
     t0, z0, zT, tack_metrics, reverse_tack_metrics = load_manifold(args.manifold)
     
-    Geodesic = GEORCE_H(tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=1000, line_search_params={'rho': 0.5})
-    ReverseGeodesic = GEORCE_H(reverse_tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=1000, line_search_params={'rho': 0.5})
+    Geodesic = GEORCE_H(tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
+    ReverseGeodesic = GEORCE_H(reverse_tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
     
     if args.method == "adam":
         Tacking = SequentialOptimizationADAM(tack_metrics, lr_rate=args.lr_rate, init_fun=None, max_iter=args.max_iter, 
@@ -192,9 +192,8 @@ def estimate_stochastic_tacking()->None:
     N_sim = len(tack_metrics_sim)
     
     methods = {}
-    
-    Geodesic = GEORCE_H(Malpha_expected, init_fun=None, T=args.T, tol=args.tol, max_iter=1000, line_search_params={'rho': 0.5})
-    ReverseGeodesic = GEORCE_H(Mbeta_expected, init_fun=None, T=args.T, tol=args.tol, max_iter=1000, line_search_params={'rho': 0.5})
+    Geodesic = GEORCE_H(Malpha_expected, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
+    ReverseGeodesic = GEORCE_H(Mbeta_expected, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
     
     
     print("Estimation of Expected Geodesics...")
@@ -227,8 +226,8 @@ def estimate_stochastic_tacking()->None:
         tack_metrics = tack_metrics_sim[i]
         reverse_tack_metrics = reverse_tack_metrics_sim[i]
 
-        Geodesic = GEORCE_H(tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=1000, line_search_params={'rho': 0.5})
-        ReverseGeodesic = GEORCE_H(reverse_tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=1000, line_search_params={'rho': 0.5})
+        Geodesic = GEORCE_H(tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
+        ReverseGeodesic = GEORCE_H(reverse_tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
         
         if args.method == "adam":
             Tacking = SequentialOptimizationADAM(tack_metrics, lr_rate=args.lr_rate, init_fun=None, max_iter=args.max_iter, 

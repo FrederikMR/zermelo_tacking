@@ -29,7 +29,8 @@ def load_stochastic_manifold(manifold:str="direction_only",
     
     if manifold == "direction_only":
         
-        eps = jrandom.normal(subkey, shape=(N_sim,2,2))
+        
+        eps = jrandom.uniform(subkey, shape=(N_sim,2), minval=-0.5, maxval=0.5)
         
         Malpha = []
         Mbeta = []
@@ -38,18 +39,18 @@ def load_stochastic_manifold(manifold:str="direction_only",
         for e in eps:
             rho=3/2
             phi=jnp.pi/2+6*jnp.pi/10
-            theta = lambda t,x,v: jnp.pi+e[0][0]
-            a=lambda t,x,v: 2+e[0][1]
+            theta = lambda t,x,v: jnp.pi
+            a=lambda t,x,v: 2
             b=lambda t,x,v: 2
-            c1 = lambda t,x,v: -rho*jnp.cos(phi)
-            c2 = lambda t,x,v: -rho*jnp.sin(phi)
+            c1 = lambda t,x,v: -rho*jnp.cos(phi+e[0])
+            c2 = lambda t,x,v: -rho*jnp.sin(phi+e[0])
             M1 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
             
-            a=lambda t,x,v: 1+e[1][0]
+            a=lambda t,x,v: 1
             b=lambda t,x,v: 1
-            c1=lambda t,x,v: 3/4
-            c2=lambda t,x,v: 0
-            theta=lambda t,x,v: 0+e[1][0]
+            c1=lambda t,x,v: 3/4*jnp.cos(e[1])
+            c2=lambda t,x,v: 0*jnp.sin(e[1])
+            theta=lambda t,x,v: 0
             M2 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
             
             Malpha.append(M1)
@@ -58,23 +59,24 @@ def load_stochastic_manifold(manifold:str="direction_only",
             tack_metrics.append([M1, M2])
             reverse_tack_metrics.append([M2, M1])
             
+        key, subkey = jrandom.split(key)
+        eps = jrandom.uniform(subkey, shape=(100,2), minval=-0.5, maxval=0.5)
+            
         rho=3/2
         phi=jnp.pi/2+6*jnp.pi/10
-        theta = lambda t,x,v: jnp.pi
-        a=lambda t,x,v: 2
-        b=lambda t,x,v: 2
-        c1 = lambda t,x,v: -rho*jnp.cos(phi)
-        c2 = lambda t,x,v: -rho*jnp.sin(phi)
-        key, subkey = jrandom.split(key)
-        Malpha_expected = ExpectedEllipticFinsler(subkey, N_sim=100, c1=c1,c2=c2, a=a,b=b,theta=theta)
+        theta = lambda t,x,v,eps: jnp.pi
+        a=lambda t,x,v,eps: 2
+        b=lambda t,x,v,eps: 2
+        c1 = lambda t,x,v,eps: -rho*jnp.cos(phi+eps)
+        c2 = lambda t,x,v,eps: -rho*jnp.sin(phi+eps)
+        Malpha_expected = ExpectedEllipticFinsler(subkey, eps[:,0], c1=c1,c2=c2, a=a,b=b,theta=theta)
         
-        a=lambda t,x,v: 1
-        b=lambda t,x,v: 1
-        c1=lambda t,x,v: 3/4
-        c2=lambda t,x,v: 0
-        theta=lambda t,x,v: 0
-        key, subkey = jrandom.split(key)
-        Mbeta_expected = ExpectedEllipticFinsler(subkey, N_sim=100, c1=c1,c2=c2, a=a,b=b,theta=theta)
+        a=lambda t,x,v,eps: 1
+        b=lambda t,x,v,eps: 1
+        c1=lambda t,x,v,eps: 3/4*jnp.cos(eps)
+        c2=lambda t,x,v,eps: 0*jnp.sin(eps)
+        theta=lambda t,x,v,eps: 0
+        Mbeta_expected = ExpectedEllipticFinsler(subkey, eps[:,1], c1=c1,c2=c2, a=a,b=b,theta=theta)
         
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([0.,0.], dtype=jnp.float32)
@@ -84,7 +86,7 @@ def load_stochastic_manifold(manifold:str="direction_only",
     
     elif manifold == "time_only":
         
-        eps = jrandom.normal(subkey, shape=(N_sim,2))
+        eps = jrandom.uniform(subkey, shape=(N_sim,), minval=-0.5, maxval=0.5)
         
         Malpha = []
         Mbeta = []
@@ -95,11 +97,11 @@ def load_stochastic_manifold(manifold:str="direction_only",
             
             rho=lambda t: -3/2
             phi=lambda t: 0
-            theta = lambda t,x,v: jnp.pi/4+e[0]
-            a=lambda t,x,v: 7+e[1]
+            theta = lambda t,x,v: jnp.pi/4
+            a=lambda t,x,v: 7
             b=lambda t,x,v: a(t,x,v)/4
-            c1 = lambda t,x,v: rho(t)*jnp.cos(phi(t))
-            c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t))
+            c1 = lambda t,x,v: rho(t)*jnp.cos(phi(t)+e)
+            c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t)+e)
             M2 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
             
             Malpha.append(M1)
@@ -111,17 +113,20 @@ def load_stochastic_manifold(manifold:str="direction_only",
             Malpha.append(M1)
             Mbeta.append(M2) 
         
+        
+        key, subkey = jrandom.split(key)
+        eps = jrandom.uniform(subkey, shape=(100,), minval=-0.5, maxval=0.5)
+        
         Malpha_expected = TimeOnly()
         
         rho=lambda t: -3/2
         phi=lambda t: 0
-        theta = lambda t,x,v: jnp.pi/4
-        a=lambda t,x,v: 7
-        b=lambda t,x,v: a(t,x,v)/4
-        c1 = lambda t,x,v: rho(t)*jnp.cos(phi(t))
-        c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t))
-        key, subkey = jrandom.split(key)
-        Mbeta_expected = ExpectedEllipticFinsler(subkey, N_sim=100, c1=c1,c2=c2, a=a,b=b,theta=theta)
+        theta = lambda t,x,v,eps: jnp.pi/4
+        a=lambda t,x,v,eps: 7
+        b=lambda t,x,v,eps: a(t,x,v,eps)/4
+        c1 = lambda t,x,v,eps: rho(t)*jnp.cos(phi(t)+eps)
+        c2 = lambda t,x,v,eps: rho(t)*jnp.sin(phi(t)+eps)
+        Mbeta_expected = ExpectedEllipticFinsler(subkey, eps, c1=c1,c2=c2, a=a,b=b,theta=theta)
         
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([0.,0.], dtype=jnp.float32)
@@ -149,9 +154,9 @@ def load_stochastic_manifold(manifold:str="direction_only",
             
          
         key, subkey = jrandom.split(key)
-        Malpha_expected = ExpectedPointcarreLeft(subkey, N_sim=100)
-        key, subkey = jrandom.split(key)
-        Mbeta_expected = ExpectedPointcarreRight(subkey, N_sim=100)
+        eps = jrandom.uniform(subkey, shape=(100,2), minval=0.4, maxval=0.6)
+        Malpha_expected = ExpectedPointcarreLeft(subkey, eps[:,0])
+        Mbeta_expected = ExpectedPointcarreRight(subkey, eps[:,1])
         
         k = 10.
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
