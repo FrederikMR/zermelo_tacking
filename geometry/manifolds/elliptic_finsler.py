@@ -37,6 +37,9 @@ class EllipticFinsler(LorentzFinslerManifold):
         super().__init__(F=self.F_metric)
         
         return
+    
+    def __str__(self)->str:
+        return "Elliptic Finsler Metric"
         
     def F_metric(self, t, x, v):
         
@@ -71,11 +74,11 @@ class ExpectedEllipticFinsler(LorentzFinslerManifold):
     def __init__(self,
                  subkey,
                  eps:Array,
-                 c1:Callable=lambda t,x,v: 1.0, 
-                 c2:Callable=lambda t,x,v: 1.0,
-                 a:Callable=lambda t,x,v: 1.0,
-                 b:Callable=lambda t,x,v: 1.0,
-                 theta:Callable=lambda t,x,v: jnp.pi/4,
+                 c1:Callable=lambda t,x,v,eps: 1.0, 
+                 c2:Callable=lambda t,x,v,eps: 1.0,
+                 a:Callable=lambda t,x,v,eps: 1.0,
+                 b:Callable=lambda t,x,v,eps: 1.0,
+                 theta:Callable=lambda t,x,v,eps: jnp.pi/4,
                  )->None:
         
         self.c1 = c1
@@ -95,6 +98,9 @@ class ExpectedEllipticFinsler(LorentzFinslerManifold):
     def F_metric(self, t, x, v):
         
         return jnp.mean(vmap(self.F_sample, in_axes=(None,None,None,0))(t,x,v,self.eps), axis=0)
+    
+    def __str__(self)->str:
+        return "Expected Elliptic Finsler Metric"
     
     def F_sample(self, t, x, v, eps):
 

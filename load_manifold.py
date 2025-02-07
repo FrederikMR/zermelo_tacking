@@ -59,7 +59,7 @@ def load_manifold(manifold:str="direction_only",
         phi=lambda t: 0
         theta = lambda t,x,v: jnp.pi/4
         a=lambda t,x,v: 7
-        b=lambda t,x,v: a(t,x,v)/4
+        b=lambda t,x,v: 7./4
         c1 = lambda t,x,v: rho(t)*jnp.cos(phi(t))
         c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t))
         Mbeta = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
@@ -173,7 +173,7 @@ def load_stochastic_manifold(manifold:str="direction_only",
             phi=lambda t: 0
             theta = lambda t,x,v: jnp.pi/4
             a=lambda t,x,v: 7
-            b=lambda t,x,v: a(t,x,v)/4
+            b=lambda t,x,v: 7./4
             c1 = lambda t,x,v: rho(t)*jnp.cos(phi(t)+e)
             c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t)+e)
             M2 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
@@ -186,7 +186,6 @@ def load_stochastic_manifold(manifold:str="direction_only",
           
             Malpha.append(M1)
             Mbeta.append(M2) 
-        
         
         key, subkey = jrandom.split(key)
         eps = jrandom.uniform(subkey, shape=(100,), minval=-0.5, maxval=0.5)

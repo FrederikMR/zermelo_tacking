@@ -36,9 +36,9 @@ from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationB
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="direction_only",
+    parser.add_argument('--manifold', default="time_only",
                         type=str)
-    parser.add_argument('--geometry', default="albatross",
+    parser.add_argument('--geometry', default="stochastic",
                         type=str)
     parser.add_argument('--method', default="adam",
                         type=str)
