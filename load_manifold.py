@@ -338,6 +338,13 @@ def load_albatross_data(manifold:str = "poincarre",
         
         eps = jrandom.uniform(subkey, shape=(N_sim,), minval=-0.5, maxval=0.5)
         
+        v_min = 0.0
+        v_max = 20.0
+        v_mean= v_max/2
+        v_slope = 0.25
+
+        frac_fun = lambda v: v_min/v_max+1.0/(1+jnp.exp(-v_slope*(jnp.linalg.norm(v)-v_mean)))
+        
         Malpha = []
         Mbeta = []
         tack_metrics = []

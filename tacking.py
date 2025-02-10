@@ -218,6 +218,8 @@ def estimate_stochastic_tacking()->None:
     else:
         raise ValueError("Invalid method for sequential optimization!")
         
+    save_times(methods, save_path)
+        
     print("Estimation of expected tack points...")
     methods['ExpectedTacking'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=1)), 
                                              t0, z0, zT)
@@ -267,7 +269,7 @@ def estimate_albatross_tacking()->None:
     
     args = parse_args()
     
-    save_path = ''.join((args.save_path, f'stochastic/{args.manifold}/'))
+    save_path = ''.join((args.save_path, f'albatross/{args.manifold}/'))
     if not os.path.exists(save_path):
         os.makedirs(save_path)
         
@@ -289,7 +291,6 @@ def estimate_albatross_tacking()->None:
     methods = {}
     Geodesic = GEORCE_H(Malpha, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
     ReverseGeodesic = GEORCE_H(Mbeta, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
-    
     
     print("Estimation of Geodesics...")
     methods['Geodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT)
