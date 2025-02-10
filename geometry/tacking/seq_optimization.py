@@ -83,7 +83,7 @@ class SequentialOptimizationBFGS(ABC):
         for i in range(self.n_curves):
             travel_time = self.StepGeodesic(self.M[i], travel_time, z_tacks[i], z_tacks[i+1])[0][-1]
             
-        return travel_time
+        return travel_time**2
     
     def __call__(self, 
                  t0:Array,
@@ -210,7 +210,7 @@ class SequentialOptimizationADAM(ABC):
         for i in range(self.n_curves):
             travel_time = self.StepGeodesic(self.M[i], travel_time, z_tacks[i], z_tacks[i+1])[0][-1]
             
-        return travel_time
+        return travel_time**2
     
     def Dtime(self,
               z_tacks:Array,
