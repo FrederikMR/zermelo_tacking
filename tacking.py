@@ -26,7 +26,7 @@ import argparse
 
 from typing import Dict
 
-from load_manifold import load_manifold, load_stochastic_manifold, load_albatross_data
+from load_manifold import load_manifold, load_stochastic_manifold, load_albatross_metrics
 
 from geometry.geodesic import GEORCE_H
 from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationBFGS
@@ -36,7 +36,7 @@ from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationB
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="time_only",
+    parser.add_argument('--manifold', default="direction_only",
                         type=str)
     parser.add_argument('--geometry', default="stochastic",
                         type=str)
@@ -60,7 +60,7 @@ def parse_args():
                         type=int)
     parser.add_argument('--albatross_file_path', default='../../../../Data/albatross/tracking_data.xls',
                         type=str)
-    parser.add_argument('--save_path', default='tacking/',
+    parser.add_argument('--save_path', default='tacking_local/',
                         type=str)
 
     args = parser.parse_args()
@@ -279,10 +279,11 @@ def estimate_albatross_tacking()->None:
     if os.path.exists(save_path):
         os.remove(save_path)
     
-    t0, z0, zT, Malpha, Mbeta, tack_metrics_sim, reverse_tack_metrics_sim = load_albatross_data(args.manifold,
-                                                                                                file_path=args.albatross_file_path,
-                                                                                                N_sim=args.N_sim,
-                                                                                                seed=args.seed)
+    t0, z0, zT, Malpha, Mbeta, tack_metrics_sim, reverse_tack_metrics_sim = load_albatross_metrics(args.manifold,
+                                                                                                   file_path=args.albatross_file_path,
+                                                                                                   N_sim=args.N_sim,
+                                                                                                   seed=args.seed,
+                                                                                                   )
     z0 = z0[args.data_idx]
     zT = zT[args.data_idx]
     
@@ -310,9 +311,9 @@ def estimate_albatross_tacking()->None:
         raise ValueError("Invalid method for sequential optimization!")
         
     print("Estimation of tack points...")
-    methods['ExpectedTacking'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=1)), 
+    methods['Tacking'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=1)), 
                                              t0, z0, zT)
-    methods['ExpectedReverseTacking'] = estimate_curve(jit(lambda t0, z0, zT: ReverseTacking(t0, z0, zT, n_tacks=1)), 
+    methods['ReverseTacking'] = estimate_curve(jit(lambda t0, z0, zT: ReverseTacking(t0, z0, zT, n_tacks=1)), 
                                                     t0, z0, zT)
     save_times(methods, save_path)
     

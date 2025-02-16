@@ -12,12 +12,14 @@ Created on Thu Apr 18 09:47:42 2024
 
 import jax.numpy as jnp
 import jax.random as jrandom
-from jax import jit, lax
 
 import pandas as pd
 
+from typing import Tuple
+
 from geometry.manifolds import EllipticFinsler, PointcarreLeft, PointcarreRight, TimeOnly
 from geometry.manifolds import ExpectedEllipticFinsler, ExpectedPointcarreLeft, ExpectedPointcarreRight
+from geometry.manifolds import StochasticEllipticFinsler
 
 #%% Load manifolds
 
@@ -25,22 +27,18 @@ def load_manifold(manifold:str="direction_only",
                   ):
     
     if manifold == "direction_only":
-        
-        rho=3/2
-        phi=jnp.pi/2+6*jnp.pi/10
-        theta = lambda t,x,v: jnp.pi
-        a=lambda t,x,v: 2
-        b=lambda t,x,v: 2
-        c1 = lambda t,x,v: -rho*jnp.cos(phi)
-        c2 = lambda t,x,v: -rho*jnp.sin(phi)
-        Malpha = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
-        
-        a=lambda t,x,v: 1
-        b=lambda t,x,v: 1
-        c1=lambda t,x,v: 3/4
-        c2=lambda t,x,v: 0
-        theta=lambda t,x,v: 0
-        Mbeta = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
+        Malpha = EllipticFinsler(c1=lambda t,x,v: -1.5*jnp.cos(jnp.pi/2+6*jnp.pi/10),
+                                 c2=lambda t,x,v: -1.5*jnp.sin(jnp.pi/2+6*jnp.pi/10), 
+                                 a=lambda t,x,v: 2,
+                                 b=lambda t,x,v: 2,
+                                 theta=lambda t,x,v: jnp.pi,
+                                 )
+        Mbeta = EllipticFinsler(c1=lambda t,x,v: 3/4,
+                                c2=lambda t,x,v: 0, 
+                                a=lambda t,x,v: 1,
+                                b=lambda t,x,v: 1,
+                                theta=lambda t,x,v: 0,
+                                )
         
         tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha]
         reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta]
@@ -54,15 +52,12 @@ def load_manifold(manifold:str="direction_only",
     elif manifold == "time_only":
 
         Malpha = TimeOnly()
-        
-        rho=lambda t: -3/2
-        phi=lambda t: 0
-        theta = lambda t,x,v: jnp.pi/4
-        a=lambda t,x,v: 7
-        b=lambda t,x,v: 7./4
-        c1 = lambda t,x,v: rho(t)*jnp.cos(phi(t))
-        c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t))
-        Mbeta = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
+        Mbeta = EllipticFinsler(c1=lambda t,x,v: -1.5*jnp.cos(0.),
+                                c2=lambda t,x,v: -1.5*jnp.sin(0.), 
+                                a=lambda t,x,v: 7,
+                                b=lambda t,x,v: 7./4,
+                                theta=lambda t,x,v: jnp.pi/4,
+                                )
         
         tack_metrics = [Malpha,Mbeta]
         reverse_tack_metrics = [Mbeta, Malpha]
@@ -103,54 +98,53 @@ def load_stochastic_manifold(manifold:str="direction_only",
     
     if manifold == "direction_only":
         
+        sigma = 1.0
         
-        eps = jrandom.uniform(subkey, shape=(N_sim,2), minval=-0.5, maxval=0.5)
+        eps = sigma*jrandom.normal(subkey, shape=(N_sim,2))
         
         Malpha = []
         Mbeta = []
         tack_metrics = []
         reverse_tack_metrics = []
         for e in eps:
-            rho=3/2
-            phi=jnp.pi/2+6*jnp.pi/10
-            theta = lambda t,x,v: jnp.pi
-            a=lambda t,x,v: 2
-            b=lambda t,x,v: 2
-            c1 = lambda t,x,v: -rho*jnp.cos(phi+e[0])
-            c2 = lambda t,x,v: -rho*jnp.sin(phi+e[0])
-            M1 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
-            
-            a=lambda t,x,v: 1
-            b=lambda t,x,v: 1
-            c1=lambda t,x,v: 3/4*jnp.cos(e[1])
-            c2=lambda t,x,v: 0*jnp.sin(e[1])
-            theta=lambda t,x,v: 0
-            M2 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
+            M1 = StochasticEllipticFinsler(eps=e[0],
+                                           c1=lambda t,x,v,eps: -1.5*jnp.cos(jnp.pi/2+6*jnp.pi/10),
+                                           c2=lambda t,x,v,eps: -1.5*jnp.sin(jnp.pi/2+6*jnp.pi/10), 
+                                           a=lambda t,x,v,eps: 2,
+                                           b=lambda t,x,v,eps: 2,
+                                           theta=lambda t,x,v,eps: eps+jnp.pi,
+                                           )
+            M2 = StochasticEllipticFinsler(eps=e[1],
+                                           c1=lambda t,x,v,eps: 3/4,
+                                           c2=lambda t,x,v,eps: 0, 
+                                           a=lambda t,x,v,eps: 1,
+                                           b=lambda t,x,v,eps: 1,
+                                           theta=lambda t,x,v,eps: eps+0,
+                                           )
             
             Malpha.append(M1)
             Mbeta.append(M2)
-            
-            tack_metrics.append([M1, M2])
-            reverse_tack_metrics.append([M2, M1])
-            
-        key, subkey = jrandom.split(key)
-        eps = jrandom.uniform(subkey, shape=(100,2), minval=-0.5, maxval=0.5)
-            
-        rho=3/2
-        phi=jnp.pi/2+6*jnp.pi/10
-        theta = lambda t,x,v,eps: jnp.pi
-        a=lambda t,x,v,eps: 2
-        b=lambda t,x,v,eps: 2
-        c1 = lambda t,x,v,eps: -rho*jnp.cos(phi+eps)
-        c2 = lambda t,x,v,eps: -rho*jnp.sin(phi+eps)
-        Malpha_expected = ExpectedEllipticFinsler(subkey, eps[:,0], c1=c1,c2=c2, a=a,b=b,theta=theta)
         
-        a=lambda t,x,v,eps: 1
-        b=lambda t,x,v,eps: 1
-        c1=lambda t,x,v,eps: 3/4*jnp.cos(eps)
-        c2=lambda t,x,v,eps: 0*jnp.sin(eps)
-        theta=lambda t,x,v,eps: 0
-        Mbeta_expected = ExpectedEllipticFinsler(subkey, eps[:,1], c1=c1,c2=c2, a=a,b=b,theta=theta)
+        tack_metrics = [(m1, m2) for m1, m2 in zip(Malpha, Mbeta)]
+        reverse_tack_metrics = [(m2, m1) for m1, m2 in zip(Malpha, Mbeta)]
+        
+        key, subkey = jrandom.split(key)
+        eps = sigma*jrandom.normal(subkey, shape=(100,2))
+        
+        Malpha_expected = ExpectedEllipticFinsler(subkey, eps[:,0], 
+                                                  c1=lambda t,x,v,eps: -1.5*jnp.cos(jnp.pi/2+6*jnp.pi/10),
+                                                  c2=lambda t,x,v,eps: -1.5*jnp.sin(jnp.pi/2+6*jnp.pi/10), 
+                                                  a=lambda t,x,v,eps: 2,
+                                                  b=lambda t,x,v,eps: 2,
+                                                  theta=lambda t,x,v,eps: eps+jnp.pi,
+                                                  )
+        Mbeta_expected = ExpectedEllipticFinsler(subkey, eps[:,1], 
+                                                 c1=lambda t,x,v,eps: 3/4,
+                                                 c2=lambda t,x,v,eps: 0, 
+                                                 a=lambda t,x,v,eps: 1,
+                                                 b=lambda t,x,v,eps: 1,
+                                                 theta=lambda t,x,v,eps: eps+0,
+                                                 )
         
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([0.,0.], dtype=jnp.float32)
@@ -160,7 +154,9 @@ def load_stochastic_manifold(manifold:str="direction_only",
     
     elif manifold == "time_only":
         
-        eps = jrandom.uniform(subkey, shape=(N_sim,), minval=-0.5, maxval=0.5)
+        sigma = 1.0
+        
+        eps = sigma*jrandom.normal(subkey, shape=(N_sim,))
         
         Malpha = []
         Mbeta = []
@@ -168,38 +164,31 @@ def load_stochastic_manifold(manifold:str="direction_only",
         reverse_tack_metrics = []
         for e in eps:
             M1 = TimeOnly()
-            
-            rho=lambda t: -3/2
-            phi=lambda t: 0
-            theta = lambda t,x,v: jnp.pi/4
-            a=lambda t,x,v: 7
-            b=lambda t,x,v: 7./4
-            c1 = lambda t,x,v: rho(t)*jnp.cos(phi(t)+e)
-            c2 = lambda t,x,v: rho(t)*jnp.sin(phi(t)+e)
-            M2 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
-            
-            Malpha.append(M1)
-            Mbeta.append(M2)
-            
-            tack_metrics.append([M1, M2])
-            reverse_tack_metrics.append([M2, M1])
+            M2 = StochasticEllipticFinsler(eps=e,
+                                           c1=lambda t,x,v,eps: -1.5,
+                                           c2=lambda t,x,v,eps: 0., 
+                                           a=lambda t,x,v,eps: 7.,
+                                           b=lambda t,x,v,eps: 7./4,
+                                           theta=lambda t,x,v,eps: eps+jnp.pi/4,
+                                           )
           
             Malpha.append(M1)
             Mbeta.append(M2) 
+            
+        tack_metrics = [(m1, m2) for m1, m2 in zip(Malpha, Mbeta)]
+        reverse_tack_metrics = [(m2, m1) for m1, m2 in zip(Malpha, Mbeta)]
         
         key, subkey = jrandom.split(key)
-        eps = jrandom.uniform(subkey, shape=(100,), minval=-0.5, maxval=0.5)
+        eps = sigma*jrandom.normal(subkey, shape=(100,))
         
         Malpha_expected = TimeOnly()
-        
-        rho=lambda t: -3/2
-        phi=lambda t: 0
-        theta = lambda t,x,v,eps: jnp.pi/4
-        a=lambda t,x,v,eps: 7
-        b=lambda t,x,v,eps: a(t,x,v,eps)/4
-        c1 = lambda t,x,v,eps: rho(t)*jnp.cos(phi(t)+eps)
-        c2 = lambda t,x,v,eps: rho(t)*jnp.sin(phi(t)+eps)
-        Mbeta_expected = ExpectedEllipticFinsler(subkey, eps, c1=c1,c2=c2, a=a,b=b,theta=theta)
+        Mbeta_expected = ExpectedEllipticFinsler(subkey, eps, 
+                                                 c1=lambda t,x,v,eps: -1.5,
+                                                 c2=lambda t,x,v,eps: 0., 
+                                                 a=lambda t,x,v,eps: 7.,
+                                                 b=lambda t,x,v,eps: 7./4,
+                                                 theta=lambda t,x,v,eps: eps+jnp.pi/4,
+                                                 )
         
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([0.,0.], dtype=jnp.float32)
@@ -222,10 +211,9 @@ def load_stochastic_manifold(manifold:str="direction_only",
             Malpha.append(M1)
             Mbeta.append(M2)
             
-            tack_metrics.append([M1, M2])
-            reverse_tack_metrics.append([M2, M1])
-            
-         
+        tack_metrics = [(m1, m2) for m1, m2 in zip(Malpha, Mbeta)]
+        reverse_tack_metrics = [(m2, m1) for m1, m2 in zip(Malpha, Mbeta)]
+
         key, subkey = jrandom.split(key)
         eps = jrandom.uniform(subkey, shape=(100,2), minval=0.4, maxval=0.6)
         Malpha_expected = ExpectedPointcarreLeft(subkey, eps[:,0])
@@ -241,20 +229,17 @@ def load_stochastic_manifold(manifold:str="direction_only",
     else:
         raise ValueError(f"Manifold, {manifold}, is not defined. Only suported is: \n\t-Euclidean\n\t-Paraboloid\n\t-Sphere")
         
-#%% Load manifolds
+#%% Load Albatross data
 
-def load_albatross_data(manifold:str = "poincarre",
-                        file_path:str = '../../../../Data/albatross/tracking_data.xls', 
-                        N_sim:int=10,
-                        seed:int=2712,
-                        ):
+def load_albatross_data(file_path:str = '../../../../Data/albatross/tracking_data.xls', 
+                        )->Tuple:
     
     albatross_data = pd.read_excel(file_path)
     bird_idx = [0,25,50]
     data_idx = {bird_idx[0]: [[67,90], [149, 195], [315, 335]],
                 bird_idx[1]: [[30, 40], [115, 140], [140, 160]],
-                bird_idx[2]: [[15, 35], [92, 108], [325, 370]]}
-    
+                bird_idx[2]: [[15, 35], [92, 108], [325, 370]],
+                }
     
     track_id = albatross_data["TRACKID"].unique()
     time_data = []
@@ -275,6 +260,18 @@ def load_albatross_data(manifold:str = "poincarre",
     x_data = [jnp.vstack((y1,y2)).T for y1,y2 in zip(x1,x2)]
     w_data = [jnp.vstack((y1,y2)).T for y1,y2 in zip(w1,w2)]
     
+    return x_data, w_data, data_idx
+
+#%% Load Albatross Metrics
+
+def load_albatross_metrics(manifold:str = "poincarre",
+                           file_path:str = '../../../../Data/albatross/tracking_data.xls', 
+                           N_sim:int=5,
+                           seed:int=2712,
+                           ):
+    
+    x_data, _ , data_idx = load_albatross_data(file_path)
+
     t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
     z0 = [x_data[b_idx][idx_val[0]] for b_idx,vals in data_idx.items() for idx_val in vals]
     zT = [x_data[b_idx][idx_val[1]] for b_idx,vals in data_idx.items() for idx_val in vals]
@@ -282,35 +279,39 @@ def load_albatross_data(manifold:str = "poincarre",
     key = jrandom.key(seed)
     key, subkey = jrandom.split(key)
     
+    v_min = 0.0
+    v_max = 20.0
+    v_mean= v_max/2
+    v_slope = 0.25
+
+    frac_fun = lambda v: v_min/v_max+1.0/(1+jnp.exp(-v_slope*(jnp.linalg.norm(v)-v_mean)))
+    
     if manifold == "direction_only":
         
-        v_min = 0.0
-        v_max = 20.0
-        v_mean= v_max/2
-        v_slope = 0.25
+        sigma = 1.0
 
-        frac_fun = lambda v: v_min/v_max+1.0/(1+jnp.exp(-v_slope*(jnp.linalg.norm(v)-v_mean)))
-
-        eps = jrandom.uniform(subkey, shape=(N_sim,2), minval=-0.5, maxval=0.5)
+        eps = sigma*jrandom.normal(subkey, shape=(N_sim,2))
         
         Malpha_stoch = []
         Mbeta_stoch = []
         tack_metrics = []
         reverse_tack_metrics = []
         for e in eps:
-            a=lambda t,x,v: jnp.linalg.norm(v)
-            b=lambda t,x,v: jnp.linalg.norm(v)
-            c1=lambda t,x,v: frac_fun(v)*jnp.linalg.norm(v)
-            c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2))
-            theta = lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))+e[0]#-jnp.pi/4
-            M1 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
-            
-            a=lambda t,x,v: jnp.linalg.norm(v)
-            b=lambda t,x,v: jnp.linalg.norm(v)
-            c1=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)
-            c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2))
-            theta = lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))+e[1]#-jnp.pi/4
-            M2 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
+            M1 = StochasticEllipticFinsler(eps=e[0],
+                                           c1=lambda t,x,v,eps: frac_fun(v)*jnp.linalg.norm(v),
+                                           c2=lambda t,x,v,eps: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2)), 
+                                           a=lambda t,x,v,eps: jnp.linalg.norm(v),
+                                           b=lambda t,x,v,eps: jnp.linalg.norm(v),
+                                           theta=lambda t,x,v,eps: eps+(jnp.pi/2-jnp.arctan(v[1]/v[0])),
+                                           )
+
+            M2 = StochasticEllipticFinsler(eps=e[1],
+                                           c1=lambda t,x,v,eps: -frac_fun(v)*jnp.linalg.norm(v),
+                                           c2=lambda t,x,v,eps: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2)), 
+                                           a=lambda t,x,v,eps: jnp.linalg.norm(v),
+                                           b=lambda t,x,v,eps: jnp.linalg.norm(v),
+                                           theta=lambda t,x,v,eps: eps+(jnp.pi/2-jnp.arctan(v[1]/v[0])),
+                                           )
             
             Malpha_stoch.append(M1)
             Mbeta_stoch.append(M2)
@@ -318,32 +319,26 @@ def load_albatross_data(manifold:str = "poincarre",
             tack_metrics.append([M1, M2])
             reverse_tack_metrics.append([M2, M1])
 
-        a=lambda t,x,v: jnp.linalg.norm(v)
-        b=lambda t,x,v: jnp.linalg.norm(v)
-        c1=lambda t,x,v: frac_fun(v)*jnp.linalg.norm(v)
-        c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2))
-        theta = lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))#-jnp.pi/4
-        Malpha = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
-        
-        a=lambda t,x,v: jnp.linalg.norm(v)
-        b=lambda t,x,v: jnp.linalg.norm(v)
-        c1=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)
-        c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2))
-        theta = lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))#-jnp.pi/4
-        Mbeta = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
+        Malpha = EllipticFinsler(c1=lambda t,x,v: frac_fun(v)*jnp.linalg.norm(v),
+                                 c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2)), 
+                                 a=lambda t,x,v: jnp.linalg.norm(v),
+                                 b=lambda t,x,v: jnp.linalg.norm(v),
+                                 theta=lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))#-jnp.pi/4,
+                                 )
+        Mbeta = EllipticFinsler(c1=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v),
+                                c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2)), 
+                                a=lambda t,x,v: jnp.linalg.norm(v),
+                                b=lambda t,x,v: jnp.linalg.norm(v),
+                                theta=lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))#-jnp.pi/4,
+                                )
         
         return t0, z0, zT, Malpha, Mbeta, tack_metrics, reverse_tack_metrics
     
     elif manifold == "time_only":
         
-        eps = jrandom.uniform(subkey, shape=(N_sim,), minval=-0.5, maxval=0.5)
+        sigma = 1.0
         
-        v_min = 0.0
-        v_max = 20.0
-        v_mean= v_max/2
-        v_slope = 0.25
-
-        frac_fun = lambda v: v_min/v_max+1.0/(1+jnp.exp(-v_slope*(jnp.linalg.norm(v)-v_mean)))
+        eps = sigma*jrandom.normal(subkey, shape=(N_sim,))
         
         Malpha = []
         Mbeta = []
@@ -351,13 +346,13 @@ def load_albatross_data(manifold:str = "poincarre",
         reverse_tack_metrics = []
         for e in eps:
             M1 = TimeOnly()
-            
-            a=lambda t,x,v: jnp.linalg.norm(v)
-            b=lambda t,x,v: jnp.linalg.norm(v)
-            c1=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)
-            c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2))
-            theta = lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))+e#-jnp.pi/4
-            M2 = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
+            M2 = StochasticEllipticFinsler(eps=e,
+                                           c1=lambda t,x,v,eps: -frac_fun(v)*jnp.linalg.norm(v),
+                                           c2=lambda t,x,v,eps: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2)), 
+                                           a=lambda t,x,v,eps: jnp.linalg.norm(v),
+                                           b=lambda t,x,v,eps: jnp.linalg.norm(v),
+                                           theta=lambda t,x,v,eps: eps+(jnp.pi/2-jnp.arctan(v[1]/v[0])),
+                                           )
             
             Malpha.append(M1)
             Mbeta.append(M2)
@@ -373,13 +368,12 @@ def load_albatross_data(manifold:str = "poincarre",
         eps = jrandom.uniform(subkey, shape=(100,), minval=-0.5, maxval=0.5)
         
         Malpha = TimeOnly()
-        
-        a=lambda t,x,v: jnp.linalg.norm(v)
-        b=lambda t,x,v: jnp.linalg.norm(v)
-        c1=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)
-        c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2))
-        theta = lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))#-jnp.pi/4
-        Mbeta = EllipticFinsler(c1=c1,c2=c2, a=a,b=b,theta=theta)
+        Mbeta = EllipticFinsler(c1=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v),
+                                c2=lambda t,x,v: -frac_fun(v)*jnp.linalg.norm(v)*jnp.sqrt((1-frac_fun(v)**2)), 
+                                a=lambda t,x,v: jnp.linalg.norm(v),
+                                b=lambda t,x,v: jnp.linalg.norm(v),
+                                theta=lambda t,x,v: (jnp.pi/2-jnp.arctan(v[1]/v[0]))#-jnp.pi/4,
+                                )
         
         return t0, z0, zT, Malpha, Mbeta, tack_metrics, reverse_tack_metrics
     

@@ -110,7 +110,7 @@ class TackPlots(ABC):
                 #Plotting Curves
                 ax.plot(expected_tack_curve[(T*j):(T*(j+1))][:,0], 
                         expected_tack_curve[(T*j):(T*(j+1))][:,1], 
-                        color=c1,
+                        color=c2,
                         linewidth=self.linewidth)
                 
                 ax.plot(expected_reverse_tack_curve[(T*j):(T*(j+1))][:,0], 
@@ -187,11 +187,11 @@ class TackPlots(ABC):
                     #Plotting Curves
                     ax.plot(stack_curve[(T*j):(T*(j+1))][:,0], 
                             stack_curve[(T*j):(T*(j+1))][:,1], 
-                            color=c1,
+                            color=c2,
                             linewidth=self.linewidth)
                     ax.plot(sreverse_tack_curve[(T*j):(T*(j+1))][:,0], 
                             sreverse_tack_curve[(T*j):(T*(j+1))][:,1], 
-                            color=c2,
+                            color=c1,
                             linewidth=self.linewidth)
         
         #Indicatrices
