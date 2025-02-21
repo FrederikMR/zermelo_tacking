@@ -158,8 +158,8 @@ class TackPlots(ABC):
                                                                       ):
             
             #Curves with no tacking
-            ax.plot(szs[:,0], szs[:,1], color=c1, linewidth=self.linewidth, alpha=self.alpha)
-            ax.plot(szs_reverse[:,0], szs_reverse[:,1], color=c2, linewidth=self.linewidth, alpha=self.alpha)
+            ax.plot(szs[:,0], szs[:,1], color=c1, linewidth=self.linewidth, alpha=0.2)
+            ax.plot(szs_reverse[:,0], szs_reverse[:,1], color=c2, linewidth=self.linewidth, alpha=0.2)
             
             #Plotting tack curves
             for j in range(2):
@@ -168,11 +168,15 @@ class TackPlots(ABC):
                     ax.plot(stack_curve[(T*j):(T*(j+1))][:,0], 
                             stack_curve[(T*j):(T*(j+1))][:,1], 
                             color=c1,
-                            linewidth=self.linewidth)
+                            linewidth=self.linewidth,
+                            alpha=0.2,
+                            )
                     ax.plot(sreverse_tack_curve[(T*j):(T*(j+1))][:,0], 
                             sreverse_tack_curve[(T*j):(T*(j+1))][:,1], 
                             color=c2,
-                            linewidth=self.linewidth)
+                            linewidth=self.linewidth,
+                            alpha=0.2,
+                            )
         
                     #Plotting points
                     ax.scatter(stack_curve[(T*(j+1))][0], 
@@ -188,11 +192,15 @@ class TackPlots(ABC):
                     ax.plot(stack_curve[(T*j):(T*(j+1))][:,0], 
                             stack_curve[(T*j):(T*(j+1))][:,1], 
                             color=c2,
-                            linewidth=self.linewidth)
+                            linewidth=self.linewidth,
+                            alpha=0.2,
+                            )
                     ax.plot(sreverse_tack_curve[(T*j):(T*(j+1))][:,0], 
                             sreverse_tack_curve[(T*j):(T*(j+1))][:,1], 
                             color=c1,
-                            linewidth=self.linewidth)
+                            linewidth=self.linewidth,
+                            alpha=0.2,
+                            )
         
         #Indicatrices
         if indicatrix_alpha is not None:

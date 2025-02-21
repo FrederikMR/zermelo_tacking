@@ -24,7 +24,7 @@ def submit_job():
 
 #%% Generate jobs
 
-def generate_job(manifold, geometry, data_idx):
+def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
 
     with open ('submit_tacking.sh', 'w') as rsh:
         rsh.write(f'''\
@@ -49,14 +49,15 @@ def generate_job(manifold, geometry, data_idx):
     python3 tacking.py \\
         --manifold {manifold} \\
         --geometry {geometry} \\
-        --method adam \\
+        --method {method} \\
         --T 1000 \\
         --lr_rate 0.01 \\
         --tol 0.0001 \\
         --max_iter 1000 \\
         --sub_iter 5 \\
         --N_sim 5 \\
-        --data_idx {data_idx} \\
+        --idx_birds {bird_idx} \\
+        --idx_data {data_idx} \\
         --seed 2712 \\
         --albatross_file_path /work3/fmry/Data/albatross/tracking_data.xls \\
         --save_path tacking_gpu/ \\
@@ -70,25 +71,30 @@ def loop_jobs(wait_time = 1.0):
     
     geometries = ['fixed', 'stochastic', 'albatross']
     manifolds = ['direction_only', 'time_only', 'poincarre']
-    idx = [0,1,2,3,4,5,6,7,8]
-    
+    bird_idx = [0,1,2]
+    data_idx = [0,1,2]
+
     for geo in geometries:
         for man in manifolds:
             if geo == 'albatross':
-                for data_idx in idx:
-                    time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
-                    generate_job(man, geo, data_idx)
-                    try:
-                        submit_job()
-                    except:
-                        time.sleep(100.0+np.abs(np.random.normal(0.0,1.,1)))
+                for idx_bird in bird_idx:
+                    for idx_data in data_idx:
+                        time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
+                        if man == "direction_only":
+                            generate_job(man, geo, idx_bird, idx_data, "constant")
+                        else:
+                            generate_job(man, geo, idx_bird, idx_data, "adam")
                         try:
                             submit_job()
                         except:
-                            print(f"Job script with {man}, {geo} failed!")
+                            time.sleep(100.0+np.abs(np.random.normal(0.0,1.,1)))
+                            try:
+                                submit_job()
+                            except:
+                                print(f"Job script with {man}, {geo} failed!")
             else:
                 time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
-                generate_job(man, geo, 0)
+                generate_job(man, geo, 0, 0, "adam")
                 try:
                     submit_job()
                 except:

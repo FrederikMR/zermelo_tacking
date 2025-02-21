@@ -72,7 +72,6 @@ class EllipticFinsler(LorentzFinslerManifold):
 
 class ExpectedEllipticFinsler(LorentzFinslerManifold):
     def __init__(self,
-                 subkey,
                  eps:Array,
                  c1:Callable=lambda t,x,v,eps: 1.0, 
                  c2:Callable=lambda t,x,v,eps: 1.0,

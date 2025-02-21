@@ -47,18 +47,19 @@ class ConstantTacking(ABC):
                     p:Array,
                     )->Array:
         
-        return self.Malpha.F(0.0, jnp.zeros(self.dim),p,0.0)+self.Mbeta.F(0.0, jnp.zeros(self.dim),self.zT-p,0.0)
+        return jnp.abs(self.Malpha.F(self.t0, jnp.zeros(self.dim),p-self.z0))+jnp.abs(self.Mbeta.F(self.t0, jnp.zeros(self.dim),self.zT-p))
     
     def obj_fun(self,
                 p:Array,
                 )->Array:
         
-        return (self.Malpha.F(0.0, jnp.zeros(self.dim),p,0.0)+self.Mbeta.F(0.0, jnp.zeros(self.dim),self.zT-p,0.0))**2
+        return self.Malpha.F(self.t0, jnp.zeros(self.dim),p-self.z0)+self.Mbeta.F(self.t0, jnp.zeros(self.dim),self.zT-p)
     
     def __call__(self, 
                  t0:Array,
                  z0:Array,
                  zT:Array,
+                 n_tacks:int=1,
                  )->Array:
         
         self.t0 = t0
@@ -87,5 +88,5 @@ class ConstantTacking(ABC):
         grad = res.jac
         idx = res.nit
         
-        return t, zt, grad, idx
+        return t.reshape(1), zt, grad, idx
     

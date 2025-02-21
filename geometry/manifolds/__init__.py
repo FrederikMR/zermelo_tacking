@@ -17,3 +17,4 @@ from .nEuclidean import nEuclidean
 from .pointcarre_metric import PointcarreLeft, PointcarreRight, ExpectedPointcarreLeft, ExpectedPointcarreRight
 from .elliptic_finsler import EllipticFinsler, ExpectedEllipticFinsler, StochasticEllipticFinsler
 from .time_only import TimeOnly
+from .wind_metric import LeftWind, RightWind, StochasticLeftWind, StochasticRightWind, ExpectedLeftWind, ExpectedRightWind
