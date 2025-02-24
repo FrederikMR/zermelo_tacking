@@ -26,7 +26,8 @@
         --max_iter 1000 \
         --sub_iter 5 \
         --N_sim 5 \
-        --data_idx 8 \
+        --idx_birds 2 \
+        --idx_data 2 \
         --seed 2712 \
         --albatross_file_path /work3/fmry/Data/albatross/tracking_data.xls \
         --save_path tacking_gpu/ \
