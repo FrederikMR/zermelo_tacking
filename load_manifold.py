@@ -93,8 +93,8 @@ def load_manifold(manifold:str="direction_only",
         Malpha = PointcarreLeft(d=0.5)
         Mbeta = PointcarreRight(d=0.5)
         
-        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha]
-        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta]
+        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta]
+        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta,Malpha,Mbeta,Malpha]
         
         k = 10.
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()

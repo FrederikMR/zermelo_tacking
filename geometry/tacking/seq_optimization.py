@@ -81,7 +81,7 @@ class SequentialOptimizationBFGS(ABC):
         
         travel_time = self.t0
         for i in range(self.n_curves):
-            travel_time = self.StepGeodesic(self.M[i], travel_time, z_tacks[i], z_tacks[i+1])[0][-1]
+            travel_time = jnp.abs(self.StepGeodesic(self.M[i], travel_time, z_tacks[i], z_tacks[i+1])[0][-1])
             
         return travel_time**2
     
@@ -208,7 +208,7 @@ class SequentialOptimizationADAM(ABC):
         
         travel_time = self.t0
         for i in range(self.n_curves):
-            travel_time = self.StepGeodesic(self.M[i], travel_time, z_tacks[i], z_tacks[i+1])[0][-1]
+            travel_time = jnp.abs(self.StepGeodesic(self.M[i], travel_time, z_tacks[i], z_tacks[i+1])[0][-1])
             
         return travel_time**2
     
