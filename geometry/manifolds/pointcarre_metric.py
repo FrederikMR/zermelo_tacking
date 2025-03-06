@@ -35,7 +35,7 @@ class PointcarreLeft(LorentzFinslerManifold):
         d = self.d
         d2 = d**2
         
-        return (-jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)+(x+y)*d)/(2*d2*v-v)
+        return (jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)-(x+y)*d)/(v*(1.-2*d2))
     
 #%% Elliptic Finsler
 
@@ -58,7 +58,7 @@ class PointcarreRight(LorentzFinslerManifold):
         d = self.d
         d2 = d**2
         
-        return (-jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)+(x-y)*d)/(2*d2*v-v)
+        return (jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)-(x-y)*d)/(v*(1.-2*d2))
     
 #%% Elliptic Finsler
 
@@ -86,7 +86,7 @@ class ExpectedPointcarreLeft(LorentzFinslerManifold):
         d = eps
         d2 = d**2
         
-        return (-jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)+(x+y)*d)/(2*d2*v-v)
+        return (jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)-(x+y)*d)/(v*(1.-2*d2))
     
 #%% Elliptic Finsler
 
@@ -114,4 +114,4 @@ class ExpectedPointcarreRight(LorentzFinslerManifold):
         d = eps
         d2 = d**2
         
-        return (-jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)+(x-y)*d)/(2*d2*v-v)
+        return (jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)-(x-y)*d)/(v*(1.-2*d2))
