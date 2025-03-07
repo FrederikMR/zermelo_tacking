@@ -57,8 +57,6 @@ class TackPlots(ABC):
                                 stochastic_zs_reverse:Array,
                                 stochastic_tack_curve:Array,
                                 stochastic_reverse_tack_curve:Array,
-                                indicatrix_alpha:Array=None,
-                                indicatrix_beta:Array=None,
                                 xscales:List=None,
                                 yscales:List=None,
                                 equal_frame:bool=False,
@@ -96,7 +94,6 @@ class TackPlots(ABC):
                            color=c1,
                            s=self.s)
                     
-                    
                 ax.plot(expected_reverse_tack_curve[(T*j):(T*(j+1))][:,0], 
                         expected_reverse_tack_curve[(T*j):(T*(j+1))][:,1], 
                         color=c2,
@@ -117,22 +114,6 @@ class TackPlots(ABC):
                         expected_reverse_tack_curve[(T*j):(T*(j+1))][:,1], 
                         color=c1,
                         linewidth=self.linewidth)
-                    
-        #Indicatrices
-        if indicatrix_alpha is not None:
-            ax.plot(indicatrix_alpha[:,0]+z0[0], 
-                    indicatrix_alpha[:,1]+z0[1], 
-                    color=c1, 
-                    linestyle='dashed',
-                    )
-        
-        #Indicatrices
-        if indicatrix_beta is not None:
-            ax.plot(indicatrix_beta[:,0]+zT[0], 
-                    indicatrix_beta[:,1]+zT[1], 
-                    color=c2, 
-                    linestyle='dashed',
-                    )
         
         ax.set_xlabel(r'$x^{1}$', fontsize=25)
         ax.set_ylabel(r'$x^{2}$', fontsize=25)
@@ -142,12 +123,8 @@ class TackPlots(ABC):
         #ax.set_ylim(yscales[0], yscales[1])
         #ax.set_aspect('equal', adjustable='box')
         
-        ax.plot([0],[0], color=c1, label=r'$F^{\alpha}$', linewidth=self.linewidth)
-        ax.plot([0],[0], color=c2, label=r'$F^{\beta}$', linewidth=self.linewidth)
-        
-        #Start and end point
-        ax.scatter(z0[0], z0[1], marker="s", color=c1, s=self.s)
-        ax.scatter(zT[0], zT[1], marker="s", color=c2, s=self.s)
+        ax.scatter(z0[0], z0[1], marker="s", color='black', s=self.s/2)
+        ax.scatter(zT[0], zT[1], marker="s", color='black', s=self.s/2)
         
         ax = fig.add_subplot(122)
         
@@ -202,22 +179,6 @@ class TackPlots(ABC):
                             alpha=0.2,
                             )
         
-        #Indicatrices
-        if indicatrix_alpha is not None:
-            ax.plot(indicatrix_alpha[:,0]+z0[0], 
-                    indicatrix_alpha[:,1]+z0[1], 
-                    color=c1, 
-                    linestyle='dashed',
-                    )
-        
-        #Indicatrices
-        if indicatrix_beta is not None:
-            ax.plot(indicatrix_beta[:,0]+zT[0], 
-                    indicatrix_beta[:,1]+zT[1], 
-                    color=c2, 
-                    linestyle='dashed',
-                    )
-        
         ax.set_xlabel(r'$x^{1}$', fontsize=self.font_size)
         ax.set_ylabel(r'$x^{2}$', fontsize=self.font_size)
         ax.set_title("Stochastic Tack Curve", fontsize=self.font_size)
@@ -233,12 +194,12 @@ class TackPlots(ABC):
         ax.plot([0],[0], color=c2, label=r'$F^{\beta}$', linewidth=self.linewidth)
         
         #Start and end point
-        ax.scatter(z0[0], z0[1], marker="s", color=c1, s=self.s/2)
-        ax.scatter(zT[0], zT[1], marker="s", color=c2, s=self.s/2)
+        ax.scatter(z0[0], z0[1], marker="s", color='black', s=self.s/2)
+        ax.scatter(zT[0], zT[1], marker="s", color='black', s=self.s/2)
         
         lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
         lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
-        fig.legend(lines, labels, loc=(0.17,0.7), ncol=2, fontsize=25)
+        fig.legend(lines, labels, loc=(0.425,0.75), ncol=2, fontsize=25)
         
         fig.tight_layout()
         

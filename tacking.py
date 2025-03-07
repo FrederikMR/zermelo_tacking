@@ -40,11 +40,13 @@ def parse_args():
                         type=str)
     parser.add_argument('--geometry', default="albatross",
                         type=str)
-    parser.add_argument('--method', default="constant",
+    parser.add_argument('--method', default="adam",
                         type=str)
     parser.add_argument('--T', default=1_000,
                         type=int)
     parser.add_argument('--lr_rate', default=0.01,
+                        type=float)
+    parser.add_argument('--alpha', default=1.0,
                         type=float)
     parser.add_argument('--tol', default=1e-2,
                         type=float)
@@ -102,10 +104,13 @@ def estimate_method(Geodesic, z0, zT, M, base_length=None):
 
 #%% Curve Estimation
 
-def estimate_curve(CurveMethod, t0, z0, zT):
+def estimate_curve(CurveMethod, t0, z0, zT, transform=None):
     
     method_curve = {}    
     ts, zs, grad, idx = CurveMethod(t0, z0, zT)
+    if transform is not None:
+        zs = transform(zs)
+
     method_curve['travel_time'] = ts[-1]
     method_curve['zs'] = zs
     method_curve['grad_norm'] = jnp.linalg.norm(grad)
@@ -115,6 +120,26 @@ def estimate_curve(CurveMethod, t0, z0, zT):
     
     return method_curve
 
+#%% Rorate Data
+
+def rotate_forward(z0, v1, z0_tilde, zT_tilde):
+
+    v2 = zT_tilde-z0_tilde
+    
+    theta = jnp.arccos(jnp.dot(v1,v2)/(jnp.linalg.norm(v1)*jnp.linalg.norm(v2)))
+    
+    rot_mat = jnp.array([[jnp.cos(theta), jnp.sin(theta)],
+                         [-jnp.sin(theta), jnp.cos(theta)]])
+    
+    return z0, jnp.dot(rot_mat, v2)+z0, rot_mat
+    
+
+def rotate_backward(z0, z0_tilde, z, rot_mat):
+    
+    v1 = z-z0
+    rot_invmat = jnp.linalg.inv(rot_mat)
+
+    return jnp.dot(rot_invmat, v1)+z0_tilde
 
 #%% Save times
 
@@ -141,7 +166,7 @@ def estimate_tacking()->None:
     if os.path.exists(save_path):
         os.remove(save_path)
     
-    t0, z0, zT, tack_metrics, reverse_tack_metrics = load_manifold(args.manifold)
+    t0, z0, zT, tack_metrics, reverse_tack_metrics = load_manifold(args.manifold, alpha=args.alpha)
     
     Geodesic = GEORCE_H(tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
     ReverseGeodesic = GEORCE_H(reverse_tack_metrics[0], init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
@@ -194,7 +219,8 @@ def estimate_stochastic_tacking()->None:
     
     t0, z0, zT, Malpha_expected, Mbeta_expected, tack_metrics_sim, reverse_tack_metrics_sim = load_stochastic_manifold(args.manifold,
                                                                                                                        N_sim=args.N_sim,
-                                                                                                                       seed=args.seed)
+                                                                                                                       seed=args.seed,
+                                                                                                                       alpha=args.alpha)
     
     N_sim = len(tack_metrics_sim)
     
@@ -281,13 +307,27 @@ def estimate_albatross_tacking()->None:
     if os.path.exists(save_path):
         os.remove(save_path)
     
-    t0, z0, zT, Malpha, Mbeta, MEalpha, MEbeta, tack_metrics_sim, reverse_tack_metrics_sim = load_albatross_metrics(args.manifold,
-                                                                                                                    file_path=args.albatross_file_path,
-                                                                                                                    N_sim=args.N_sim,
-                                                                                                                    seed=args.seed,
-                                                                                                                    idx_birds = args.idx_birds,
-                                                                                                                    idx_data = args.idx_data,
-                                                                                                                    )
+    t0, z0_tilde, zT_tilde, Malpha, Mbeta, MEalpha, MEbeta, tack_metrics_sim, reverse_tack_metrics_sim = load_albatross_metrics(args.manifold,
+                                                                                                                                file_path=args.albatross_file_path,
+                                                                                                                                N_sim=args.N_sim,
+                                                                                                                                seed=args.seed,
+                                                                                                                                idx_birds = args.idx_birds,
+                                                                                                                                idx_data = args.idx_data,
+                                                                                                                                alpha=args.alpha,
+                                                                                                                                )
+    if args.manifold == "poincarre":
+        
+        z0 = jnp.array([1.0,1.0])
+        v1 = jnp.array([1.0, 0.0])
+        
+        z0, zT, rot_mat = rotate_forward(z0, v1, z0_tilde, zT_tilde)
+        
+        transform_fun = vmap(lambda z: rotate_backward(z0, z0_tilde, z, rot_mat))
+    else:
+        z0 = z0_tilde
+        zT = zT_tilde
+        transform_fun = None
+    
     #z0 = z0[args.data_idx]
     #zT = zT[args.data_idx]
     
@@ -298,8 +338,8 @@ def estimate_albatross_tacking()->None:
     ReverseGeodesic = GEORCE_H(Mbeta, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
     
     print("Estimation of Geodesics...")
-    methods['Geodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT)
-    methods['ReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
+    methods['Geodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT, transform=transform_fun)
+    methods['ReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT, transform=transform_fun)
     
     if args.method == "adam":
         Tacking = SequentialOptimizationADAM([Malpha, Mbeta], lr_rate=args.lr_rate, init_fun=None, max_iter=args.max_iter, 
@@ -319,17 +359,17 @@ def estimate_albatross_tacking()->None:
         
     print("Estimation of tack points...")
     methods['Tacking'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=1)), 
-                                             t0, z0, zT)
+                                             t0, z0, zT, transform=transform_fun)
     methods['ReverseTacking'] = estimate_curve(jit(lambda t0, z0, zT: ReverseTacking(t0, z0, zT, n_tacks=1)), 
-                                                    t0, z0, zT)
+                                                    t0, z0, zT, transform=transform_fun)
     save_times(methods, save_path)
     
     print("Estimation of Expected Geodesics...")
     Geodesic = GEORCE_H(MEalpha, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
     ReverseGeodesic = GEORCE_H(MEbeta, init_fun=None, T=args.T, tol=args.tol, max_iter=args.max_iter, line_search_params={'rho': 0.5})
     
-    methods['ExpectedGeodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT)
-    methods['ExpectedReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
+    methods['ExpectedGeodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT, transform=transform_fun)
+    methods['ExpectedReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT, transform=transform_fun)
     
     if args.method == "adam":
         Tacking = SequentialOptimizationADAM([MEalpha, MEbeta], lr_rate=args.lr_rate, init_fun=None, max_iter=args.max_iter, 
@@ -349,9 +389,9 @@ def estimate_albatross_tacking()->None:
         
     print("Estimation of tack points...")
     methods['ExpectedTacking'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=1)), 
-                                             t0, z0, zT)
+                                             t0, z0, zT, transform=transform_fun)
     methods['ExpectedReverseTacking'] = estimate_curve(jit(lambda t0, z0, zT: ReverseTacking(t0, z0, zT, n_tacks=1)), 
-                                                    t0, z0, zT)
+                                                    t0, z0, zT, transform=transform_fun)
     save_times(methods, save_path)
     
     for i in range(N_sim):
@@ -380,15 +420,15 @@ def estimate_albatross_tacking()->None:
             raise ValueError("Invalid method for sequential optimization!")
         
         print("\tEstimation of Geodesics...")
-        methods[f'Geodesic{i}'] = estimate_curve(jit(Geodesic), t0, z0, zT)
-        methods[f'ReverseGeodesic{i}'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
+        methods[f'Geodesic{i}'] = estimate_curve(jit(Geodesic), t0, z0, zT, transform=transform_fun)
+        methods[f'ReverseGeodesic{i}'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT, transform=transform_fun)
         
         for j in range(1, len(tack_metrics)):
             print(f"\tEstimation {j} tack points...")
             methods[f'Tacking{i}_{j}'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=j)), 
-                                                     t0, z0, zT)
+                                                     t0, z0, zT, transform=transform_fun)
             methods[f'ReverseTacking{i}_{j}'] = estimate_curve(jit(lambda t0, z0, zT: ReverseTacking(t0, z0, zT, n_tacks=j)), 
-                                                            t0, z0, zT)
+                                                            t0, z0, zT, transform=transform_fun)
             save_times(methods, save_path)
             
     return

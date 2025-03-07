@@ -64,7 +64,7 @@ class SequentialOptimizationBFGS(ABC):
         for i in range(self.n_curves):
             self.Geodesic.M = self.M[i]
             (t,zt, *_) = self.Geodesic(t0, z_tacks[i], z_tacks[i+1])
-            t0 = t[-1]
+            t0 = jnp.abs(t[-1])
             t_curves.append(t)
             zt_curves.append(zt[:-1])
             
@@ -191,7 +191,7 @@ class SequentialOptimizationADAM(ABC):
         for i in range(self.n_curves):
             self.Geodesic.M = self.M[i]
             (t,zt, *_) = self.Geodesic(t0, z_tacks[i], z_tacks[i+1])
-            t0 = t[-1]
+            t0 = jnp.abs(t[-1])
             t_curves.append(t)
             zt_curves.append(zt[:-1])
             

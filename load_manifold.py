@@ -26,6 +26,7 @@ from geometry.manifolds import ExpectedLeftWind, ExpectedRightWind
 #%% Load manifolds
 
 def load_manifold(manifold:str="direction_only", 
+                  alpha:float=1.0,
                   ):
     
     if manifold == "direction_only":
@@ -90,8 +91,8 @@ def load_manifold(manifold:str="direction_only",
     
     elif manifold == "poincarre":
         
-        Malpha = PointcarreLeft(d=0.5)
-        Mbeta = PointcarreRight(d=0.5)
+        Malpha = PointcarreLeft(d=0.5, alpha=alpha)
+        Mbeta = PointcarreRight(d=0.5, alpha=alpha)
         
         tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta]
         reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta,Malpha,Mbeta,Malpha]
@@ -111,6 +112,7 @@ def load_manifold(manifold:str="direction_only",
 def load_stochastic_manifold(manifold:str="direction_only", 
                              seed:int=2712,
                              N_sim:int=10,
+                             alpha:float=1.0,
                              ):
     
     key = jrandom.key(seed)
@@ -243,8 +245,8 @@ def load_stochastic_manifold(manifold:str="direction_only",
         tack_metrics = []
         reverse_tack_metrics = []
         for e in eps:
-            M1 = PointcarreLeft(d=e[0])
-            M2 = PointcarreRight(d=e[1])
+            M1 = PointcarreLeft(d=e[0], alpha=alpha)
+            M2 = PointcarreRight(d=e[1], alpha=alpha)
             
             Malpha.append(M1)
             Mbeta.append(M2)
@@ -254,8 +256,8 @@ def load_stochastic_manifold(manifold:str="direction_only",
 
         key, subkey = jrandom.split(key)
         eps = jrandom.uniform(subkey, shape=(100,2), minval=0.4, maxval=0.6)
-        Malpha_expected = ExpectedPointcarreLeft(subkey, eps[:,0])
-        Mbeta_expected = ExpectedPointcarreRight(subkey, eps[:,1])
+        Malpha_expected = ExpectedPointcarreLeft(subkey, eps[:,0], alpha=alpha)
+        Mbeta_expected = ExpectedPointcarreRight(subkey, eps[:,1], alpha=alpha)
         
         k = 10.
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
@@ -308,6 +310,7 @@ def load_albatross_metrics(manifold:str = "poincarre",
                            seed:int=2712,
                            idx_birds:int = 0,
                            idx_data:int = 0,
+                           alpha:float=1.0,
                            ):
     
     x_data, time_data, x1, x2, w1, w2, w_data, data_idx = load_albatross_data(file_path)
@@ -460,8 +463,8 @@ def load_albatross_metrics(manifold:str = "poincarre",
         tack_metrics = []
         reverse_tack_metrics = []
         for e in eps:
-            M1 = PointcarreLeft(d=e[0])
-            M2 = PointcarreRight(d=e[1])
+            M1 = PointcarreLeft(d=e[0], alpha=alpha)
+            M2 = PointcarreRight(d=e[1], alpha=alpha)
             
             Malpha.append(M1)
             Mbeta.append(M2)
@@ -469,12 +472,12 @@ def load_albatross_metrics(manifold:str = "poincarre",
             tack_metrics.append([M1, M2])
             reverse_tack_metrics.append([M2, M1])
 
-        Malpha = PointcarreLeft(d=0.5)
-        Mbeta = PointcarreRight(d=0.5)
+        Malpha = PointcarreLeft(d=0.5, alpha=alpha)
+        Mbeta = PointcarreRight(d=0.5, alpha=alpha)
         
         eps = jrandom.uniform(subkey, shape=(100,2), minval=0.4, maxval=0.6)
-        MEalpha = ExpectedPointcarreLeft(subkey, eps[:,0])
-        MEbeta = ExpectedPointcarreRight(subkey, eps[:,1])
+        MEalpha = ExpectedPointcarreLeft(subkey, eps[:,0], alpha=alpha)
+        MEbeta = ExpectedPointcarreRight(subkey, eps[:,1], alpha=alpha)
         
         return t0, z0, zT, Malpha, Mbeta, MEalpha, MEbeta, tack_metrics, reverse_tack_metrics
     

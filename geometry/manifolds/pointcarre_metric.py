@@ -19,9 +19,11 @@ from .manifold import LorentzFinslerManifold
 class PointcarreLeft(LorentzFinslerManifold):
     def __init__(self,
                  d:float=0.5,
+                 alpha:float=1.0,
                  )->None:
         
         self.d = d
+        self.alpha = alpha
 
         super().__init__(F=self.F_metric)
         
@@ -35,16 +37,18 @@ class PointcarreLeft(LorentzFinslerManifold):
         d = self.d
         d2 = d**2
         
-        return (jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)-(x+y)*d)/(v*(1.-2*d2))
+        return (jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)-(x+y)*d)/(self.alpha*v*(1.-2*d2))
     
 #%% Elliptic Finsler
 
 class PointcarreRight(LorentzFinslerManifold):
     def __init__(self,
                  d:float=0.5,
+                 alpha:float=1.0,
                  )->None:
         
         self.d = d
+        self.alpha = alpha
 
         super().__init__(F=self.F_metric)
         
@@ -58,7 +62,7 @@ class PointcarreRight(LorentzFinslerManifold):
         d = self.d
         d2 = d**2
         
-        return (jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)-(x-y)*d)/(v*(1.-2*d2))
+        return (jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)-(x-y)*d)/(self.alpha*v*(1.-2*d2))
     
 #%% Elliptic Finsler
 
@@ -66,9 +70,11 @@ class ExpectedPointcarreLeft(LorentzFinslerManifold):
     def __init__(self,
                  subkey,
                  eps:Array,
+                 alpha:float=1.0,
                  )->None:
         
         self.eps = eps
+        self.alpha=alpha
 
         super().__init__(F=self.F_metric)
         
@@ -86,7 +92,7 @@ class ExpectedPointcarreLeft(LorentzFinslerManifold):
         d = eps
         d2 = d**2
         
-        return (jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)-(x+y)*d)/(v*(1.-2*d2))
+        return (jnp.sqrt((x**2)+(y**2)-((x-y)**2)*d2)-(x+y)*d)/(self.alpha*v*(1.-2*d2))
     
 #%% Elliptic Finsler
 
@@ -94,9 +100,11 @@ class ExpectedPointcarreRight(LorentzFinslerManifold):
     def __init__(self,
                  subkey,
                  eps:Array,
+                 alpha:float=1.0,
                  )->None:
         
         self.eps = eps
+        self.alpha = alpha
 
         super().__init__(F=self.F_metric)
         
@@ -114,4 +122,4 @@ class ExpectedPointcarreRight(LorentzFinslerManifold):
         d = eps
         d2 = d**2
         
-        return (jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)-(x-y)*d)/(v*(1.-2*d2))
+        return (jnp.sqrt((x**2)+(y**2)-((x+y)**2)*d2)-(x-y)*d)/(self.alpha*v*(1.-2*d2))
