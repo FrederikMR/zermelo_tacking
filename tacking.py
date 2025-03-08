@@ -36,7 +36,7 @@ from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationB
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="direction_only",
+    parser.add_argument('--manifold', default="poincarre",
                         type=str)
     parser.add_argument('--geometry', default="albatross",
                         type=str)
@@ -109,7 +109,9 @@ def estimate_curve(CurveMethod, t0, z0, zT, transform=None):
     method_curve = {}    
     ts, zs, grad, idx = CurveMethod(t0, z0, zT)
     if transform is not None:
+        print(zs[0])
         zs = transform(zs)
+        print(zs[0])
 
     method_curve['travel_time'] = ts[-1]
     method_curve['zs'] = zs
@@ -128,8 +130,8 @@ def rotate_forward(z0, v1, z0_tilde, zT_tilde):
     
     theta = jnp.arccos(jnp.dot(v1,v2)/(jnp.linalg.norm(v1)*jnp.linalg.norm(v2)))
     
-    rot_mat = jnp.array([[jnp.cos(theta), jnp.sin(theta)],
-                         [-jnp.sin(theta), jnp.cos(theta)]])
+    rot_mat = jnp.array([[jnp.cos(theta),-jnp.sin(theta)],
+                         [jnp.sin(theta), jnp.cos(theta)]])
     
     return z0, jnp.dot(rot_mat, v2)+z0, rot_mat
     
@@ -315,6 +317,7 @@ def estimate_albatross_tacking()->None:
                                                                                                                                 idx_data = args.idx_data,
                                                                                                                                 alpha=args.alpha,
                                                                                                                                 )
+
     if args.manifold == "poincarre":
         
         z0 = jnp.array([1.0,1.0])
