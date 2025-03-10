@@ -18,3 +18,4 @@ from .pointcarre_metric import PointcarreLeft, PointcarreRight, ExpectedPointcar
 from .elliptic_finsler import EllipticFinsler, ExpectedEllipticFinsler, StochasticEllipticFinsler
 from .time_only import TimeOnly
 from .wind_metric import LeftWind, RightWind, StochasticLeftWind, StochasticRightWind, ExpectedLeftWind, ExpectedRightWind
+from .poincarre_north import PointcarreNorthLeft, PointcarreNorthRight, ExpectedPointcarreNorthLeft, ExpectedPointcarreNorthRight

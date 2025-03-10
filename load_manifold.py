@@ -22,6 +22,7 @@ from geometry.manifolds import ExpectedEllipticFinsler, ExpectedPointcarreLeft, 
 from geometry.manifolds import StochasticEllipticFinsler
 from geometry.manifolds import LeftWind, RightWind, StochasticLeftWind, StochasticRightWind
 from geometry.manifolds import ExpectedLeftWind, ExpectedRightWind
+from geometry.manifolds import PointcarreNorthLeft, PointcarreNorthRight, ExpectedPointcarreNorthLeft, ExpectedPointcarreNorthRight
 
 #%% Load manifolds
 
@@ -93,6 +94,21 @@ def load_manifold(manifold:str="direction_only",
         
         Malpha = PointcarreLeft(d=0.5, alpha=alpha)
         Mbeta = PointcarreRight(d=0.5, alpha=alpha)
+        
+        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta]
+        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta,Malpha,Mbeta,Malpha]
+        
+        k = 10.
+        t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
+        z0 = jnp.array([1.,1.], dtype=jnp.float32)
+        zT = jnp.array([k,1.], dtype=jnp.float32)
+        
+        return t0, z0, zT, tack_metrics, reverse_tack_metrics
+    
+    elif manifold == "poincarre_north":
+        
+        Malpha = PointcarreNorthLeft(v=2.0)
+        Mbeta = PointcarreNorthRight(v=2.0)
         
         tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta]
         reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta,Malpha,Mbeta,Malpha]
@@ -258,6 +274,35 @@ def load_stochastic_manifold(manifold:str="direction_only",
         eps = jrandom.uniform(subkey, shape=(100,2), minval=0.4, maxval=0.6)
         Malpha_expected = ExpectedPointcarreLeft(subkey, eps[:,0], alpha=alpha)
         Mbeta_expected = ExpectedPointcarreRight(subkey, eps[:,1], alpha=alpha)
+        
+        k = 10.
+        t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
+        z0 = jnp.array([1.,1.], dtype=jnp.float32)
+        zT = jnp.array([k,1.], dtype=jnp.float32)
+        
+        return t0, z0, zT, Malpha_expected, Mbeta_expected, tack_metrics, reverse_tack_metrics
+    elif manifold == "poincarre_north":
+        
+        eps = jrandom.uniform(subkey, shape=(N_sim,2), minval=1.0, maxval=3.0)
+        
+        Malpha = []
+        Mbeta = []
+        tack_metrics = []
+        reverse_tack_metrics = []
+        for e in eps:
+            M1 = PointcarreNorthLeft(v=e[0])
+            M2 = PointcarreNorthRight(v=e[1])
+            
+            Malpha.append(M1)
+            Mbeta.append(M2)
+            
+        tack_metrics = [(m1, m2) for m1, m2 in zip(Malpha, Mbeta)]
+        reverse_tack_metrics = [(m2, m1) for m1, m2 in zip(Malpha, Mbeta)]
+
+        key, subkey = jrandom.split(key)
+        eps = jrandom.uniform(subkey, shape=(100,2), minval=1.0, maxval=3.0)
+        Malpha_expected = ExpectedPointcarreNorthLeft(subkey, eps[:,0])
+        Mbeta_expected = ExpectedPointcarreNorthRight(subkey, eps[:,1])
         
         k = 10.
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
@@ -478,6 +523,33 @@ def load_albatross_metrics(manifold:str = "poincarre",
         eps = jrandom.uniform(subkey, shape=(100,2), minval=0.4, maxval=0.6)
         MEalpha = ExpectedPointcarreLeft(subkey, eps[:,0], alpha=alpha)
         MEbeta = ExpectedPointcarreRight(subkey, eps[:,1], alpha=alpha)
+        
+        return t0, z0, zT, Malpha, Mbeta, MEalpha, MEbeta, tack_metrics, reverse_tack_metrics
+    
+    elif manifold == "poincarre_north":
+        
+        eps = jrandom.uniform(subkey, shape=(N_sim,2), minval=1.0, maxval=3.0)
+        
+        Malpha = []
+        Mbeta = []
+        tack_metrics = []
+        reverse_tack_metrics = []
+        for e in eps:
+            M1 = PointcarreNorthLeft(v=e[0])
+            M2 = PointcarreNorthRight(v=e[1])
+            
+            Malpha.append(M1)
+            Mbeta.append(M2)
+            
+            tack_metrics.append([M1, M2])
+            reverse_tack_metrics.append([M2, M1])
+
+        Malpha = PointcarreNorthLeft(v=2.0)
+        Mbeta = PointcarreNorthRight(v=2.0)
+        
+        eps = jrandom.uniform(subkey, shape=(100,2), minval=1.0, maxval=3.0)
+        MEalpha = ExpectedPointcarreNorthLeft(subkey, eps[:,0])
+        MEbeta = ExpectedPointcarreNorthRight(subkey, eps[:,1])
         
         return t0, z0, zT, Malpha, Mbeta, MEalpha, MEbeta, tack_metrics, reverse_tack_metrics
     

@@ -36,7 +36,7 @@ from geometry.tacking import SequentialOptimizationADAM, SequentialOptimizationB
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="poincarre",
+    parser.add_argument('--manifold', default="poincarre_north",
                         type=str)
     parser.add_argument('--geometry', default="albatross",
                         type=str)
@@ -109,9 +109,7 @@ def estimate_curve(CurveMethod, t0, z0, zT, transform=None):
     method_curve = {}    
     ts, zs, grad, idx = CurveMethod(t0, z0, zT)
     if transform is not None:
-        print(zs[0])
         zs = transform(zs)
-        print(zs[0])
 
     method_curve['travel_time'] = ts[-1]
     method_curve['zs'] = zs
@@ -318,7 +316,7 @@ def estimate_albatross_tacking()->None:
                                                                                                                                 alpha=args.alpha,
                                                                                                                                 )
 
-    if args.manifold == "poincarre":
+    if "poincarre" in args.manifold:
         
         z0 = jnp.array([1.0,1.0])
         v1 = jnp.array([1.0, 0.0])
