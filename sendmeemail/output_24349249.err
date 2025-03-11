@@ -1,0 +1,19 @@
+Loaded dependency [python3/3.10.12]: sqlite3/3.42.0
+Loaded module: python3/3.10.12
+
+Switching from python3/3.10.12 to python3/3.10.12
+  Loading requirement: sqlite3/3.42.0
+2025-03-10 06:08:46.082413: E external/xla/xla/service/slow_operation_alarm.cc:65] 
+********************************
+[Compiling module jit__lambda_] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+2025-03-10 06:08:58.084215: E external/xla/xla/service/slow_operation_alarm.cc:133] The operation took 2m12.001567264s
+
+********************************
+[Compiling module jit__lambda_] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+2025-03-10 06:17:24.552278: E external/xla/xla/service/slow_operation_alarm.cc:133] The operation took 2m11.616342312s
+
+********************************
+[Compiling module jit__lambda_] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
