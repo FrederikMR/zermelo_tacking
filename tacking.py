@@ -122,25 +122,48 @@ def estimate_curve(CurveMethod, t0, z0, zT, transform=None):
 
 #%% Rorate Data
 
-def rotate_forward(z0, v1, z0_tilde, zT_tilde):
+#def rotate_forward(z0, v1, z0_tilde, zT_tilde):
 
-    v2 = zT_tilde-z0_tilde
+#    v2 = zT_tilde-z0_tilde
     
-    theta = jnp.arccos(jnp.dot(v1,v2)/(jnp.linalg.norm(v1)*jnp.linalg.norm(v2)))
+#    theta = jnp.arccos(jnp.dot(v1,v2)/(jnp.linalg.norm(v1)*jnp.linalg.norm(v2)))
     #theta = -theta
     
-    rot_mat = jnp.array([[jnp.cos(theta),-jnp.sin(theta)],
-                         [jnp.sin(theta), jnp.cos(theta)]])
+#    rot_mat = jnp.array([[jnp.cos(theta),-jnp.sin(theta)],
+#                         [jnp.sin(theta), jnp.cos(theta)]])
     
-    return z0, jnp.dot(rot_mat, v2)+z0, rot_mat
+#    return z0, jnp.dot(rot_mat, v2)+z0, rot_mat
     
 
-def rotate_backward(z0, z0_tilde, z, rot_mat):
+#def rotate_backward(z0, z0_tilde, z, rot_mat):
     
-    v1 = z-z0
-    rot_invmat = jnp.linalg.inv(rot_mat)
+#    v1 = z-z0
+#    rot_invmat = jnp.linalg.inv(rot_mat)
 
-    return jnp.dot(rot_invmat, v1)+z0_tilde
+#    return jnp.dot(rot_invmat, v1)+z0_tilde
+
+def rotate_forward(z0, zT):
+    
+    v11 = z0[0]
+    v12 = zT[0]
+    
+    v21 = z0[-1]
+    v22 = zT[-1]
+    
+    v1 = jnp.min(jnp.array([v11, v12]))
+    v2 = jnp.min(jnp.array([v21, v22]))
+    v = jnp.array([v1, v2]).squeeze()
+    
+    z0 += (1.-v)
+    zT += (1.-v)
+        
+    return z0, zT, v
+
+def rotate_backward(z, v):
+    
+    z -= (1.-v)
+    
+    return z
 
 #%% Save times
 
@@ -319,12 +342,14 @@ def estimate_albatross_tacking()->None:
 
     if "poincarre" in args.manifold:
         
-        z0 = jnp.array([1.0,1.0])
-        v1 = jnp.array([1.0, 0.0])
+        #z0, zT, rot_vec = rotate_forward(z0_tilde, zT_tilde)
         
-        z0, zT, rot_mat = rotate_forward(z0, v1, z0_tilde, zT_tilde)
+        #transform_fun = vmap(lambda z: rotate_backward(z, rot_vec))
         
-        transform_fun = vmap(lambda z: rotate_backward(z0, z0_tilde, z, rot_mat))
+        z0 = z0_tilde
+        zT = zT_tilde
+        transform_fun = None
+        
     else:
         z0 = z0_tilde
         zT = zT_tilde
