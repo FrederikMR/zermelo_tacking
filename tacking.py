@@ -127,6 +127,7 @@ def rotate_forward(z0, v1, z0_tilde, zT_tilde):
     v2 = zT_tilde-z0_tilde
     
     theta = jnp.arccos(jnp.dot(v1,v2)/(jnp.linalg.norm(v1)*jnp.linalg.norm(v2)))
+    #theta = -theta
     
     rot_mat = jnp.array([[jnp.cos(theta),-jnp.sin(theta)],
                          [jnp.sin(theta), jnp.cos(theta)]])

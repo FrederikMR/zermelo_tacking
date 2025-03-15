@@ -107,8 +107,8 @@ def load_manifold(manifold:str="direction_only",
     
     elif manifold == "poincarre_north":
         
-        Malpha = PointcarreNorthLeft(v=2.0)
-        Mbeta = PointcarreNorthRight(v=2.0)
+        Malpha = PointcarreNorthLeft()
+        Mbeta = PointcarreNorthRight()
         
         tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta]
         reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta,Malpha,Mbeta,Malpha]
@@ -290,8 +290,8 @@ def load_stochastic_manifold(manifold:str="direction_only",
         tack_metrics = []
         reverse_tack_metrics = []
         for e in eps:
-            M1 = PointcarreNorthLeft(v=e[0])
-            M2 = PointcarreNorthRight(v=e[1])
+            M1 = PointcarreNorthLeft()
+            M2 = PointcarreNorthRight()
             
             Malpha.append(M1)
             Mbeta.append(M2)
@@ -535,8 +535,8 @@ def load_albatross_metrics(manifold:str = "poincarre",
         tack_metrics = []
         reverse_tack_metrics = []
         for e in eps:
-            M1 = PointcarreNorthLeft(v=e[0])
-            M2 = PointcarreNorthRight(v=e[1])
+            M1 = PointcarreNorthLeft()
+            M2 = PointcarreNorthRight()
             
             Malpha.append(M1)
             Mbeta.append(M2)
@@ -544,8 +544,8 @@ def load_albatross_metrics(manifold:str = "poincarre",
             tack_metrics.append([M1, M2])
             reverse_tack_metrics.append([M2, M1])
 
-        Malpha = PointcarreNorthLeft(v=2.0)
-        Mbeta = PointcarreNorthRight(v=2.0)
+        Malpha = PointcarreNorthLeft()
+        Mbeta = PointcarreNorthRight()
         
         eps = jrandom.uniform(subkey, shape=(100,2), minval=1.0, maxval=3.0)
         MEalpha = ExpectedPointcarreNorthLeft(subkey, eps[:,0])
