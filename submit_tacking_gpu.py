@@ -73,6 +73,7 @@ def loop_jobs(wait_time = 1.0):
     geometries = ['fixed', 'stochastic', 'albatross']
     manifolds = ['direction_only', 'time_only', 'poincarre']
     
+    geometries = ['albatross']
     manifolds = ['poincarre', 'poincarre_north']
     bird_idx = [0,1,2]
     data_idx = [0,1,2]
