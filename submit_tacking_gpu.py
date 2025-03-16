@@ -52,7 +52,7 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
         --method {method} \\
         --T 1000 \\
         --lr_rate 0.01 \\
-        --alpha 0.5 \\
+        --alpha 1.0 \\
         --tol 0.0001 \\
         --max_iter 1000 \\
         --sub_iter 5 \\

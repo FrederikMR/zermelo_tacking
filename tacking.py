@@ -342,13 +342,13 @@ def estimate_albatross_tacking()->None:
 
     if "poincarre" in args.manifold:
         
-        #z0, zT, rot_vec = rotate_forward(z0_tilde, zT_tilde)
+        z0, zT, rot_vec = rotate_forward(z0_tilde, zT_tilde)
         
-        #transform_fun = vmap(lambda z: rotate_backward(z, rot_vec))
+        transform_fun = vmap(lambda z: rotate_backward(z, rot_vec))
         
-        z0 = z0_tilde
-        zT = zT_tilde
-        transform_fun = None
+        #z0 = z0_tilde
+        #zT = zT_tilde
+        #transform_fun = None
         
     else:
         z0 = z0_tilde
