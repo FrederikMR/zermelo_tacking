@@ -1,6 +1,6 @@
     #! /bin/bash
     #BSUB -q gpua100
-    #BSUB -J poincarre_albatross
+    #BSUB -J poincarre_north_albatross
     #BSUB -n 4
     #BSUB -gpu "num=1:mode=exclusive_process"
     #BSUB -W 24:00
@@ -17,7 +17,7 @@
     module swap python3/3.10.12
     
     python3 tacking.py \
-        --manifold poincarre \
+        --manifold poincarre_north \
         --geometry albatross \
         --method adam \
         --T 1000 \
