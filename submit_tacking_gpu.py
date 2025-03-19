@@ -66,6 +66,8 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
     
     return
 
+#Wednesday 10:30, Friday 9:00 11:00
+
 #%% Loop jobs
 
 def loop_jobs(wait_time = 1.0):
@@ -75,6 +77,7 @@ def loop_jobs(wait_time = 1.0):
     
     geometries = ['albatross']
     manifolds = ['poincarre', 'poincarre_north']
+    manifolds = ['poincarre_north']
     bird_idx = [0,1,2]
     data_idx = [0,1,2]
 
