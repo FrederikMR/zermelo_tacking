@@ -29,7 +29,7 @@ class PointcarreNorthLeft(LorentzFinslerManifold):
         u, v = z[0], z[1]
         x,y = dz[0], dz[1]
         
-        return 2.*(0.5*jnp.sqrt((3*(x**2))+2*x*y+3*(y**2))-0.5*x-0.5*y)/jnp.arctan(4.*v)
+        return 2.*(0.5*jnp.sqrt((3*(x**2))+2*x*y+3*(y**2))-0.5*x-0.5*y)/(3*jnp.arctan(v))
     
 #%% Elliptic Finsler
 
@@ -46,7 +46,7 @@ class PointcarreNorthRight(LorentzFinslerManifold):
         u, v = z[0], z[1]
         x,y = dz[0], dz[1]
         
-        return 2.*(0.5*jnp.sqrt((3*(x**2))-2.*x*y+3*(y**2))-0.5*x+0.5*y)/jnp.arctan(4.*v)
+        return 2.*(0.5*jnp.sqrt((3*(x**2))-2.*x*y+3*(y**2))-0.5*x+0.5*y)/(3*jnp.arctan(v))
     
 #%% Elliptic Finsler
 
@@ -71,7 +71,7 @@ class ExpectedPointcarreNorthLeft(LorentzFinslerManifold):
         u, v = z[0], z[1]
         x,y = dz[0], dz[1]
         
-        return 2.*(0.5*jnp.sqrt((3*(x**2))+2*x*y+3*(y**2))-0.5*x-0.5*y)/jnp.arctan(4.*v)
+        return 2.*(0.5*jnp.sqrt((3*(x**2))+2*x*y+3*(y**2))-0.5*x-0.5*y)/(3*jnp.arctan(v))
     
 #%% Elliptic Finsler
 
@@ -96,4 +96,4 @@ class ExpectedPointcarreNorthRight(LorentzFinslerManifold):
         u, v = z[0], z[1]
         x,y = dz[0], dz[1]
         
-        return 2.*(0.5*jnp.sqrt((3*(x**2))-2.*x*y+3*(y**2))-0.5*x+0.5*y)/jnp.arctan(4.*v)
+        return 2.*(0.5*jnp.sqrt((3*(x**2))-2.*x*y+3*(y**2))-0.5*x+0.5*y)/(3*jnp.arctan(v))

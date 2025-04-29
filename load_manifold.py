@@ -95,10 +95,10 @@ def load_manifold(manifold:str="direction_only",
         Malpha = PointcarreLeft(d=0.5, alpha=alpha)
         Mbeta = PointcarreRight(d=0.5, alpha=alpha)
         
-        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta]
-        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta,Malpha,Mbeta,Malpha]
+        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha]
+        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta]
         
-        k = 30.
+        k = 20.
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([1.,1.], dtype=jnp.float32)
         zT = jnp.array([k,1.], dtype=jnp.float32)
@@ -110,10 +110,10 @@ def load_manifold(manifold:str="direction_only",
         Malpha = PointcarreNorthLeft()
         Mbeta = PointcarreNorthRight()
         
-        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta,Malpha,Mbeta]
-        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta,Malpha,Mbeta,Malpha]
+        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha]
+        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta]
         
-        k = 30.
+        k = 20.
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([1.,1.], dtype=jnp.float32)
         zT = jnp.array([k,1.], dtype=jnp.float32)
