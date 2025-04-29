@@ -1,6 +1,6 @@
     #! /bin/bash
     #BSUB -q gpua100
-    #BSUB -J poincarre_north_albatross
+    #BSUB -J poincarre_north_fixed
     #BSUB -n 4
     #BSUB -gpu "num=1:mode=exclusive_process"
     #BSUB -W 24:00
@@ -18,7 +18,7 @@
     
     python3 tacking.py \
         --manifold poincarre_north \
-        --geometry albatross \
+        --geometry fixed \
         --method adam \
         --T 1000 \
         --lr_rate 0.01 \
@@ -27,8 +27,8 @@
         --max_iter 1000 \
         --sub_iter 5 \
         --N_sim 5 \
-        --idx_birds 2 \
-        --idx_data 2 \
+        --idx_birds 0 \
+        --idx_data 0 \
         --seed 2712 \
         --albatross_file_path /work3/fmry/Data/albatross/tracking_data.xls \
         --save_path tacking_gpu/ \
