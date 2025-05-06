@@ -20,10 +20,10 @@
         --manifold poincarre_north \
         --geometry fixed \
         --method adam \
-        --T 100 \
+        --T 1000 \
         --lr_rate 0.01 \
         --alpha 1.0 \
-        --tol 0.00000001 \
+        --tol 0.000000001 \
         --max_iter 1000 \
         --sub_iter 5 \
         --N_sim 5 \
