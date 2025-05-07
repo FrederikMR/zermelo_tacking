@@ -24,7 +24,7 @@
         --lr_rate 0.01 \
         --alpha 1.0 \
         --tol 0.000000001 \
-        --max_iter 1000 \
+        --max_iter 10000 \
         --sub_iter 5 \
         --N_sim 5 \
         --idx_birds 0 \
