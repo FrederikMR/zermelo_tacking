@@ -23,7 +23,7 @@
         --T 1000 \
         --lr_rate 0.01 \
         --alpha 1.0 \
-        --tol 0.000000001 \
+        --tol 0.0001 \
         --max_iter 10000 \
         --sub_iter 10 \
         --N_sim 5 \
