@@ -65,6 +65,41 @@ def load_manifold(manifold:str="direction_only",
         
         return t0, z0, zT, tack_metrics, reverse_tack_metrics
     
+    elif manifold == "time_position":
+        c1_m1=lambda t,x,v: 0.5*jnp.arctan(x[1])
+        c2_m1=lambda t,x,v: 0.5*jnp.arctan(x[1])
+        a_m1=lambda t,x,v: jnp.arctan(x[1])*(2.+jnp.sin(t))
+        b_m1=lambda t,x,v: jnp.arctan(x[1])*(2.+jnp.sin(t))
+        theta_m1=lambda t,x,v: t/3
+        
+        c1_m2=lambda t,x,v: 0.5*jnp.arctan(x[1])
+        c2_m2=lambda t,x,v: -0.5*jnp.arctan(x[1])
+        a_m2=lambda t,x,v: jnp.arctan(x[1])*(2.+jnp.sin(t))
+        b_m2=lambda t,x,v: jnp.arctan(x[1])*(2.+jnp.sin(t))
+        theta_m2=lambda t,x,v: t/3
+        
+        Malpha = EllipticFinsler(c1=c1_m1,
+                                 c2=c2_m1, 
+                                 a=a_m1,
+                                 b=b_m1,
+                                 theta=theta_m1,
+                                 )
+        Mbeta = EllipticFinsler(c1=c1_m2,
+                                c2=c2_m2, 
+                                a=a_m2,
+                                b=b_m2,
+                                theta=theta_m2,
+                                )
+        
+        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha]
+        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta]
+        
+        t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
+        z0 = jnp.array([0.,1.], dtype=jnp.float32)
+        zT = jnp.array([20.,1.], dtype=jnp.float32)
+        
+        return t0, z0, zT, tack_metrics, reverse_tack_metrics
+    
     elif manifold == "time_only":
         
         c1_m2=lambda t,x,v: -1.5*jnp.cos(0.)
@@ -117,6 +152,22 @@ def load_manifold(manifold:str="direction_only",
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([0.,1.], dtype=jnp.float32)
         zT = jnp.array([k,1.], dtype=jnp.float32)
+        
+        return t0, z0, zT, tack_metrics, reverse_tack_metrics
+    
+    elif manifold == "poincarre_north_a":
+        
+        Malpha = PointcarreNorthLeft()
+        Mbeta = PointcarreNorthRight()
+        
+        tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha]
+        reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta]
+        
+        a = 5
+        k = 20.
+        t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
+        z0 = jnp.array([a,1.], dtype=jnp.float32)
+        zT = jnp.array([k-a,1.], dtype=jnp.float32)
         
         return t0, z0, zT, tack_metrics, reverse_tack_metrics
     
