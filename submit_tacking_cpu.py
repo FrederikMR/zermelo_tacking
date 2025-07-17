@@ -58,7 +58,7 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
         --idx_data {data_idx} \\
         --seed 2712 \\
         --albatross_file_path /work3/fmry/Data/albatross/tracking_data.xls \\
-        --save_path tacking_gpu/ \\
+        --save_path tacking_cpu/ \\
     ''')
     
     return
