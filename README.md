@@ -1,8 +1,7 @@
 # Time-dependent Zermelo navigation with tacking
 This repository contains the implementation for computing pregeodesics for a time-dependent metric as well as computing tack-curves, where it is possible to change metric along the curve.
 
-![Constructed geodesics using GEORCE and similar optimization algorithms](https://github.com/user-attachments/files/21296956/direction_only.pdf)
-
+![Constructed geodesics using GEORCE and similar optimization algorithms](https://github.com/user-attachments/assets/9cd0517d-8ae3-4a06-8f4b-313c644596f6)
 
 ## Installation and Requirements
 
