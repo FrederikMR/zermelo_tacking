@@ -54,7 +54,7 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
         --lr_rate 0.01 \\
         --alpha 1.0 \\
         --tol 0.0001 \\
-        --max_iter 10000 \\
+        --max_iter 1000 \\
         --sub_iter 10 \\
         --N_sim 5 \\
         --idx_birds {bird_idx} \\
@@ -74,7 +74,7 @@ def loop_jobs(wait_time = 1.0):
     manifolds = ['direction_only', 'time_only', 'poincarre', 'poincarre_north']
     
     geometries = ['fixed']
-    manifolds = ['time_position', 'poincarre_north_a']
+    manifolds = ['time_position']
     #manifolds = ['poincarre', 'poincarre_north']
     bird_idx = [0,1,2]
     data_idx = [0,1,2]

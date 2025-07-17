@@ -1,6 +1,6 @@
     #! /bin/bash
     #BSUB -q gpua100
-    #BSUB -J poincarre_north_a_fixed
+    #BSUB -J time_position_fixed
     #BSUB -n 4
     #BSUB -gpu "num=1:mode=exclusive_process"
     #BSUB -W 24:00
@@ -17,14 +17,14 @@
     module swap python3/3.10.12
     
     python3 tacking.py \
-        --manifold poincarre_north_a \
+        --manifold time_position \
         --geometry fixed \
         --method adam \
         --T 1000 \
         --lr_rate 0.01 \
         --alpha 1.0 \
         --tol 0.0001 \
-        --max_iter 10000 \
+        --max_iter 1000 \
         --sub_iter 10 \
         --N_sim 5 \
         --idx_birds 0 \
