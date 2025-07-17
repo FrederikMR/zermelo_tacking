@@ -9,7 +9,7 @@ The implementations in the GitHub is Python using JAX. To clone the GitHub repor
 
 ```
 git clone https://github.com/FrederikMR/zermelo_tacking.git
-cd georce
+cd zermelo_tacking
 pip install -r requirements.txt
 ```
 
