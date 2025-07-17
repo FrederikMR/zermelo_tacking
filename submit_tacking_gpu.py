@@ -54,7 +54,7 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
         --lr_rate 0.01 \\
         --alpha 1.0 \\
         --tol 0.0001 \\
-        --max_iter 1000 \\
+        --max_iter 10000 \\
         --sub_iter 10 \\
         --N_sim 5 \\
         --idx_birds {bird_idx} \\
