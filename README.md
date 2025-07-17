@@ -1,7 +1,7 @@
 # Time-dependent Zermelo navigation with tacking
 This repository contains the implementation for computing pregeodesics for a time-dependent metric as well as computing tack-curves, where it is possible to change metric along the curve.
 
-![direction_only.pdf](https://github.com/user-attachments/files/21296613/direction_only.pdf)
+![direction_only.pdf](https://github.com/FrederikMR/zermelo_tacking/blob/main/direction_only.eps))
 
 
 
