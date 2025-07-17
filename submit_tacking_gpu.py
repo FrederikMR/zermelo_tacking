@@ -70,44 +70,24 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
 
 def loop_jobs(wait_time = 1.0):
     
-    geometries = ['fixed', 'stochastic', 'albatross']
+    geometries = ['fixed']
     manifolds = ['direction_only', 'time_only', 'poincarre', 'poincarre_north']
     
     geometries = ['fixed']
     manifolds = ['time_position']
-    #manifolds = ['poincarre', 'poincarre_north']
-    bird_idx = [0,1,2]
-    data_idx = [0,1,2]
 
     for geo in geometries:
         for man in manifolds:
-            if geo == 'albatross':
-                for idx_bird in bird_idx:
-                    for idx_data in data_idx:
-                        time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
-                        if man == "direction_only":
-                            generate_job(man, geo, idx_bird, idx_data, "constant")
-                        else:
-                            generate_job(man, geo, idx_bird, idx_data, "adam")
-                        try:
-                            submit_job()
-                        except:
-                            time.sleep(100.0+np.abs(np.random.normal(0.0,1.,1)))
-                            try:
-                                submit_job()
-                            except:
-                                print(f"Job script with {man}, {geo} failed!")
-            else:
-                time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
-                generate_job(man, geo, 0, 0, "adam")
+            time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
+            generate_job(man, geo, 0, 0, "adam")
+            try:
+                submit_job()
+            except:
+                time.sleep(100.0+np.abs(np.random.normal(0.0,1.,1)))
                 try:
                     submit_job()
                 except:
-                    time.sleep(100.0+np.abs(np.random.normal(0.0,1.,1)))
-                    try:
-                        submit_job()
-                    except:
-                        print(f"Job script with {man}, {geo} failed!")
+                    print(f"Job script with {man}, {geo} failed!")
 
 #%% main
 
