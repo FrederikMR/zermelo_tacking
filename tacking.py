@@ -120,51 +120,6 @@ def estimate_curve(CurveMethod, t0, z0, zT, transform=None):
     
     return method_curve
 
-#%% Rorate Data
-
-#def rotate_forward(z0, v1, z0_tilde, zT_tilde):
-
-#    v2 = zT_tilde-z0_tilde
-    
-#    theta = jnp.arccos(jnp.dot(v1,v2)/(jnp.linalg.norm(v1)*jnp.linalg.norm(v2)))
-    #theta = -theta
-    
-#    rot_mat = jnp.array([[jnp.cos(theta),-jnp.sin(theta)],
-#                         [jnp.sin(theta), jnp.cos(theta)]])
-    
-#    return z0, jnp.dot(rot_mat, v2)+z0, rot_mat
-    
-
-#def rotate_backward(z0, z0_tilde, z, rot_mat):
-    
-#    v1 = z-z0
-#    rot_invmat = jnp.linalg.inv(rot_mat)
-
-#    return jnp.dot(rot_invmat, v1)+z0_tilde
-
-def rotate_forward(z0, zT):
-    
-    v11 = z0[0]
-    v12 = zT[0]
-    
-    v21 = z0[-1]
-    v22 = zT[-1]
-    
-    v1 = jnp.min(jnp.array([v11, v12]))
-    v2 = jnp.min(jnp.array([v21, v22]))
-    v = jnp.array([v1, v2]).squeeze()
-    
-    z0 += (1.-v)
-    zT += (1.-v)
-        
-    return z0, zT, v
-
-def rotate_backward(z, v):
-    
-    z -= (1.-v)
-    
-    return z
-
 #%% Save times
 
 def save_times(methods:Dict, save_path:str)->None:
@@ -214,8 +169,6 @@ def estimate_tacking()->None:
     print("Estimation of Geodesics...")
     methods['Geodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT)
     methods['ReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
-    
-    print("Hallo")
     
     for i in range(1, len(tack_metrics)):
         print(f"Estimation {i} tack points...")
@@ -333,14 +286,7 @@ def estimate_albatross_tacking()->None:
     if os.path.exists(save_path):
         os.remove(save_path)
     
-    t0, z0_tilde, zT_tilde, Malpha, Mbeta, MEalpha, MEbeta, tack_metrics_sim, reverse_tack_metrics_sim = load_albatross_metrics(args.manifold,
-                                                                                                                                file_path=args.albatross_file_path,
-                                                                                                                                N_sim=args.N_sim,
-                                                                                                                                seed=args.seed,
-                                                                                                                                idx_birds = args.idx_birds,
-                                                                                                                                idx_data = args.idx_data,
-                                                                                                                                alpha=args.alpha,
-                                                                                                                                )
+    t0, z0_tilde, zT_tilde, Malpha, Mbeta, MEalpha, MEbeta, tack_metrics_sim, reverse_tack_metrics_sim = load_albatross_metrics(args.manifold)
 
     if "poincarre" in args.manifold:
         
