@@ -66,17 +66,17 @@ def load_manifold(manifold:str="direction_only",
         return t0, z0, zT, tack_metrics, reverse_tack_metrics
     
     elif manifold == "time_position":
-        c1_m1=lambda t,x,v: 0.5*jnp.arctan(x[1])
-        c2_m1=lambda t,x,v: 0.5*jnp.arctan(x[1])
-        a_m1=lambda t,x,v: jnp.arctan(x[1])*(2.+jnp.sin(t))
-        b_m1=lambda t,x,v: jnp.arctan(x[1])*(2.+jnp.sin(t))
-        theta_m1=lambda t,x,v: t/3
+        c1_m1=lambda t,x,v: 0.5 #0.5*jnp.arctan(x[1])
+        c2_m1=lambda t,x,v: 0.5 #0.5*jnp.arctan(x[1])
+        a_m1=lambda t,x,v: 1.+t+(x[0]**2)+(x[1]**2) #jnp.arctan(x[1])*(2.+jnp.sin(t))
+        b_m1=lambda t,x,v: 1.+t+(x[0]**2)+(x[1]**2) #jnp.arctan(x[1])*(2.+jnp.sin(t))
+        theta_m1=lambda t,x,v: 0.0 #t/3
         
-        c1_m2=lambda t,x,v: 0.5*jnp.arctan(x[1])
-        c2_m2=lambda t,x,v: -0.5*jnp.arctan(x[1])
-        a_m2=lambda t,x,v: jnp.arctan(x[1])*(2.+jnp.sin(t))
-        b_m2=lambda t,x,v: jnp.arctan(x[1])*(2.+jnp.sin(t))
-        theta_m2=lambda t,x,v: t/3
+        c1_m2=lambda t,x,v: 0.5 #0.5*jnp.arctan(x[1])
+        c2_m2=lambda t,x,v: -0.5 #-0.5*jnp.arctan(x[1])
+        a_m2=lambda t,x,v: 1.+t+(x[0]**2)+(x[1]**2) #jnp.arctan(x[1])*(2.+jnp.sin(t))
+        b_m2=lambda t,x,v: 1.+t+(x[0]**2)+(x[1]**2) #jnp.arctan(x[1])*(2.+jnp.sin(t))
+        theta_m2=lambda t,x,v: 0.0 #t/3
         
         Malpha = EllipticFinsler(c1=c1_m1,
                                  c2=c2_m1, 
@@ -166,8 +166,8 @@ def load_manifold(manifold:str="direction_only",
         a = 5
         k = 20.
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
-        z0 = jnp.array([a,1.], dtype=jnp.float32)
-        zT = jnp.array([k-a,1.], dtype=jnp.float32)
+        z0 = jnp.array([a,5.], dtype=jnp.float32)
+        zT = jnp.array([k-a,5.], dtype=jnp.float32)
         
         return t0, z0, zT, tack_metrics, reverse_tack_metrics
     
