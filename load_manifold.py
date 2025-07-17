@@ -87,7 +87,7 @@ def load_manifold(manifold:str="direction_only",
         
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
         z0 = jnp.array([0.,0.], dtype=jnp.float32)
-        zT = jnp.array([2.,8.], dtype=jnp.float32)
+        zT = jnp.array([10.,0.], dtype=jnp.float32)
         
         return t0, z0, zT, tack_metrics, reverse_tack_metrics
     
