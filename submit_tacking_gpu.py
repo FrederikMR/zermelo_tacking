@@ -74,7 +74,7 @@ def loop_jobs(wait_time = 1.0):
     manifolds = ['direction_only', 'time_only', 'poincarre', 'poincarre_north']
     
     geometries = ['fixed']
-    manifolds = ['time_position']
+    manifolds = ['poincarre_north']
 
     for geo in geometries:
         for man in manifolds:
