@@ -38,7 +38,7 @@ All experimental results for the runtime and length estimates are saved as .pkl 
 
 ## Reference
 
-If you want to use GEORCE for scientific purposes, please cite:
+If you want to use GEORCE-H and the computation of tack curves for scientific purposes, please cite:
 
 
 
