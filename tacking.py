@@ -215,6 +215,8 @@ def estimate_tacking()->None:
     methods['Geodesic'] = estimate_curve(jit(Geodesic), t0, z0, zT)
     methods['ReverseGeodesic'] = estimate_curve(jit(ReverseGeodesic), t0, z0, zT)
     
+    print("Hallo")
+    
     for i in range(1, len(tack_metrics)):
         print(f"Estimation {i} tack points...")
         methods[f'Tacking_{i}'] = estimate_curve(jit(lambda t0, z0, zT: Tacking(t0, z0, zT, n_tacks=i)), 
