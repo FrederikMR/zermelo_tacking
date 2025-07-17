@@ -28,7 +28,7 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
 
     with open ('submit_tacking.sh', 'w') as rsh:
         rsh.write(f'''\
-    #! /bin/bash
+    #! /bin/bash	
     #BSUB -q gpua100
     #BSUB -J {manifold}_{geometry}
     #BSUB -n 4
