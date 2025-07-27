@@ -174,9 +174,9 @@ def load_manifold(manifold:str="direction_only",
         tack_metrics = [Malpha,Mbeta,Malpha,Mbeta,Malpha]
         reverse_tack_metrics = [Mbeta, Malpha, Mbeta, Malpha, Mbeta]
         
-        k = 100.
+        k = 40.
         t0 = jnp.zeros(1, dtype=jnp.float32).squeeze()
-        z0 = jnp.array([0.,5.], dtype=jnp.float32)
+        z0 = jnp.array([0.,1.], dtype=jnp.float32)
         zT = jnp.array([k,5.], dtype=jnp.float32)
         
         return t0, z0, zT, tack_metrics, reverse_tack_metrics
