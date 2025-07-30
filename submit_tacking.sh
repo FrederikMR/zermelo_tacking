@@ -20,7 +20,7 @@
         --manifold poincarre_north \
         --geometry fixed \
         --method adam \
-        --T 1000 \
+        --T 10000 \
         --lr_rate 0.01 \
         --alpha 1.0 \
         --tol 0.0001 \
