@@ -9,5 +9,5 @@ Created on Sat Aug 10 19:35:13 2024
 #%% Modules
 
 from .georceh import GEORCE_HTacking
-from .seq_optimization import SequentialOptimizationBFGS, SequentialOptimizationADAM
+from .seq_optimization import SequentialOptimizationBFGS, SequentialOptimizationADAM, SequentialOptimizationADAMSaver
 from .constant_tacking import ConstantTacking
