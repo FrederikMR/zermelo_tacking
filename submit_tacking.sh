@@ -16,7 +16,7 @@
     module swap cudnn/v8.9.1.23-prod-cuda-12.X
     module swap python3/3.10.12
     
-    python3 tacking.py \
+    python3 tacking_saver.py \
         --manifold poincarre_north \
         --geometry fixed \
         --method adam \
@@ -24,12 +24,12 @@
         --lr_rate 0.01 \
         --alpha 1.0 \
         --tol 0.0001 \
-        --max_iter 10000 \
+        --max_iter 1000 \
         --sub_iter 10 \
         --N_sim 5 \
         --idx_birds 0 \
         --idx_data 0 \
         --seed 2712 \
         --albatross_file_path /work3/fmry/Data/albatross/tracking_data.xls \
-        --save_path tacking_gpu/ \
+        --save_path tacking_gpu_saver/ \
     
