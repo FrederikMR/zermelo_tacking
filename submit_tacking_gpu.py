@@ -47,7 +47,7 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
     module swap python3/3.10.12
     
     python3 tacking.py \\
-        --manifold {manifold} \\
+        --manifold {manifold} \\ 
         --geometry {geometry} \\
         --method {method} \\
         --T 1000 \\

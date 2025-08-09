@@ -17,7 +17,7 @@
     module swap python3/3.10.12
     
     python3 tacking.py \
-        --manifold time_only \
+        --manifold time_only \ 
         --geometry fixed \
         --method adam \
         --T 100 \
