@@ -17,9 +17,9 @@ import time
 #%% Submit job
 
 def submit_job():
-    
+
     os.system("bsub < submit_tacking.sh")
-    
+
     return
 
 #%% Generate jobs
@@ -47,7 +47,7 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
     module swap python3/3.10.12
     
     python3 tacking.py \\
-        --manifold {manifold} \\ 
+        --manifold {manifold} \\
         --geometry {geometry} \\
         --method {method} \\
         --T 1000 \\
@@ -63,16 +63,16 @@ def generate_job(manifold, geometry, bird_idx, data_idx, method="adam"):
         --albatross_file_path /work3/fmry/Data/albatross/tracking_data.xls \\
         --save_path tacking_gpu/ \\
     ''')
-    
+
     return
 
 #%% Loop jobs
 
 def loop_jobs(wait_time = 1.0):
-    
+
     geometries = ['fixed']
     manifolds = ['direction_only', 'time_only', 'poincarre', 'poincarre_north']
-    
+
     geometries = ['fixed']
     manifolds = ['time_only'] #['poincarre_north']
 
@@ -92,5 +92,5 @@ def loop_jobs(wait_time = 1.0):
 #%% main
 
 if __name__ == '__main__':
-    
+
     loop_jobs(1.0)
