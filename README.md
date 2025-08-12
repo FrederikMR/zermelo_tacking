@@ -40,5 +40,15 @@ All experimental results for the runtime and length estimates are saved as .pkl 
 
 If you want to use GEORCE-H and the computation of tack curves for scientific purposes, please cite:
 
+@misc{markvorsen2025timedependentzermelonavigationtacking,
+      title={Time-dependent Zermelo navigation with tacking}, 
+      author={Steen Markvorsen and Enrique Pendás-Recondo and Frederik Möbius Rygaard},
+      year={2025},
+      eprint={2508.07274},
+      archivePrefix={arXiv},
+      primaryClass={math.DG},
+      url={https://arxiv.org/abs/2508.07274}, 
+}
+
 
 
